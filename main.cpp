@@ -62,10 +62,13 @@ int main()
 
     // Print some info
     std::cout << "Filename/url: " << formatContext->url << '\n';
+    std::cout << "Metadata:" << '\n';
+    AVDictionaryEntry *metadataTag{nullptr};
+    while ((metadataTag = av_dict_get(formatContext->metadata, "", metadataTag, AV_DICT_IGNORE_SUFFIX)))
+        std::cout << "\t" << metadataTag->key << ": " << metadataTag->value << '\n';
     std::cout << "Format: " << formatContext->iformat->long_name << '\n';
     std::cout << "Duration: " << (long double)formatContext->duration / AV_TIME_BASE << "s" << '\n';
     std::cout << "Bit rate: " << formatContext->bit_rate << '\n';
-    // TODO: Print artist, album, ...
 
     // Find the info of the streams, so we can use them
     if (avformat_find_stream_info(formatContext, nullptr))
