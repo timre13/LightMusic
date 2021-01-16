@@ -7,3 +7,7 @@
     * Prints info of container and streams
     * Cannot play float/double sample formats
     * Command line only, non-interactive
+
+## Pre-alpha 1.0-dev #1: 2020.01.16
+    * Use libavdevice library instead of libao
+    * Don't block the audio device when playing (libao blocked it)
