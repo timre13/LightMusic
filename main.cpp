@@ -28,9 +28,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <iostream>
 #include "av_includes.h"
-#include <ao/ao.h>
 
 #define VERSION_STR "pre-alpha 1.0-dev"
+#define AUDIO_OUTPUT_DEVICE_NAME "alsa" // TODO: Windows compatibility
 
 //#define FILENAME "nonpublic-test-music/des.mp3"
 //#define FILENAME "nonpublic-test-music/csp.mp3"
@@ -42,9 +42,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 int main()
 {
     std::cout << "LightMusic music player version " VERSION_STR << '\n';
-
-    // Init the audio output library
-    ao_initialize();
 
     AVFormatContext *formatContext{avformat_alloc_context()};
     if (!formatContext)
@@ -59,6 +56,12 @@ int main()
         std::cerr << "Failed to open file" << '\n';
         abort();
     }
+
+    // ------------------------------------------------------------------------
+
+    // Init audio I/O
+    avdevice_register_all();
+
 
     // Print some info
     std::cout << "Filename/url: " << formatContext->url << '\n';
@@ -120,58 +123,6 @@ int main()
             char sampleFormatStr[32];
             std::cout << "\tSample format: " << av_get_sample_fmt_string(sampleFormatStr, sizeof(sampleFormatStr), codecContext->sample_fmt) << '\n';
 
-            ao_sample_format aoSampleFormat{};
-            switch (codecContext->sample_fmt)
-            {
-            case AV_SAMPLE_FMT_U8:
-                aoSampleFormat.bits = 8;
-                break;
-
-            case AV_SAMPLE_FMT_S16:
-                aoSampleFormat.bits = 16;
-                break;
-
-            case AV_SAMPLE_FMT_S32:
-                aoSampleFormat.bits = 32;
-                break;
-
-            case AV_SAMPLE_FMT_U8P:
-                aoSampleFormat.bits = 8;
-                break;
-
-            case AV_SAMPLE_FMT_S16P:
-                aoSampleFormat.bits = 16;
-                break;
-            case AV_SAMPLE_FMT_S32P:
-                aoSampleFormat.bits = 32;
-                break;
-
-            case AV_SAMPLE_FMT_S64:
-                aoSampleFormat.bits = 64;
-                break;
-
-            case AV_SAMPLE_FMT_S64P:
-                aoSampleFormat.bits = 64;
-                break;
-
-            // TODO: Handle other sample formats, too
-
-            default:
-                aoSampleFormat.bits = 16;
-            }
-            aoSampleFormat.channels = codecContext->channels;
-            aoSampleFormat.rate = codecContext->sample_rate;
-            aoSampleFormat.byte_format = AO_FMT_NATIVE;
-            aoSampleFormat.matrix = nullptr;
-
-            // Open the default audio device
-            auto audioDev{ao_open_live(ao_default_driver_id(), &aoSampleFormat, nullptr)};
-            if (!audioDev)
-            {
-                std::cerr << "Failed to open audio device: " << strerror(errno) << '\n';
-                abort();
-            }
-
             if (avcodec_open2(codecContext, codec, nullptr))
             {
                 std::cerr << "Failed to open codex context, skipping" << '\n';
@@ -179,8 +130,46 @@ int main()
                 continue;
             }
 
-            //int bufferSize{1};
-            //uint8_t buffer[bufferSize];
+            // Get the output format of the audio device
+            AVOutputFormat *outputFormat{av_guess_format(AUDIO_OUTPUT_DEVICE_NAME, nullptr, nullptr)};
+            if (!outputFormat)
+            {
+                std::cerr << "Failed to get format of output device" << '\n';
+                abort();
+            }
+
+            AVFormatContext *outputFormatContext{avformat_alloc_context()};
+            if (!outputFormatContext)
+            {
+                std::cerr << "Failed to create output format context" << '\n';
+                abort();
+            }
+            // Tell the format context which output device to use
+            outputFormatContext->oformat = outputFormat;
+
+            // Create a stream where the output will be written to
+            AVStream* outputStream{avformat_new_stream(outputFormatContext, nullptr)};
+            if (!outputStream)
+            {
+                std::cerr << "Failed to create output stream" << '\n';
+                abort();
+            }
+            // Configure the parameters of the output stream
+            outputStream->codecpar->codec_id       = AV_CODEC_ID_PCM_S16LE;
+            outputStream->codecpar->codec_type     = AVMEDIA_TYPE_AUDIO;
+            outputStream->codecpar->format         = AV_SAMPLE_FMT_S16;
+            outputStream->codecpar->bit_rate       = codecContext->bit_rate;
+            outputStream->codecpar->sample_rate    = codecContext->sample_rate;
+            outputStream->codecpar->channels       = codecContext->channels;
+            outputStream->codecpar->channel_layout = codecContext->channel_layout;
+
+            // Tell the device the parameters
+            if (avformat_write_header(outputFormatContext, nullptr) < 0)
+            {
+                std::cerr << "Failed to write stream header to output device" << '\n';
+                abort();
+            }
+
             AVFrame *frame{av_frame_alloc()};
             AVPacket *packet{av_packet_alloc()};
 
@@ -201,8 +190,11 @@ int main()
                     continue;
                 }
 
-                // Play the buffer
-                ao_play(audioDev, (char*)frame->data[0], frame->linesize[0]);
+                // Send the packet to the device
+                if (av_write_frame(outputFormatContext, packet))
+                {
+                    std::cerr << "Failed to write packet to output device" << '\n';
+                }
 
                 // Free the packet
                 av_packet_unref(packet);
@@ -211,8 +203,6 @@ int main()
             std::cout << "End of stream" << '\n';
 
             avcodec_free_context(&codecContext);
-
-            ao_close(audioDev); // Close the audio device
         }
         else
         {
@@ -221,7 +211,6 @@ int main()
     }
     std::cout << "End of container" << '\n';
 
-    ao_shutdown();
     avformat_close_input(&formatContext);
     avformat_free_context(formatContext);
     std::cout << "========== Exit ==========" << '\n';
