@@ -161,7 +161,7 @@ int main()
             outputStream->codecpar->bit_rate       = codecContext->bit_rate;
             outputStream->codecpar->sample_rate    = codecContext->sample_rate;
             outputStream->codecpar->channels       = codecContext->channels;
-            outputStream->codecpar->channel_layout = codecContext->channel_layout;
+            outputStream->codecpar->channel_layout = AV_CH_LAYOUT_STEREO;
 
             // Tell the device the parameters
             if (avformat_write_header(outputFormatContext, nullptr) < 0)
@@ -190,17 +190,74 @@ int main()
                     continue;
                 }
 
-                // Send the packet to the device
-                if (av_write_frame(outputFormatContext, packet))
+                SwrContext *resampleContext{
+                        swr_alloc_set_opts(
+                                nullptr,
+                                outputStream->codecpar->channel_layout,         // Out channel layout
+                                (AVSampleFormat)outputStream->codecpar->format, // Out sample format
+                                outputStream->codecpar->sample_rate,            // Out sample rate
+                                AV_CH_LAYOUT_STEREO,                            // In channel layout
+                                (AVSampleFormat)codecContext->sample_fmt,       // In format
+                                codecContext->sample_rate,                      // In sample rate
+                                0,
+                                nullptr
+                )};
+                swr_init(resampleContext);
+
+                uint8_t *resampledBuffer{};
+                int outSamples{av_rescale_rnd(
+                        swr_get_delay(
+                                resampleContext,
+                                frame->sample_rate) + frame->nb_samples,
+                        codecContext->sample_rate,
+                        outputStream->codecpar->sample_rate,
+                        AV_ROUND_UP)};
+                // Allocate buffer for converted data
+                av_samples_alloc(
+                        &resampledBuffer,
+                        nullptr,
+                        outputStream->codecpar->channels,
+                        outSamples,
+                        (AVSampleFormat)outputStream->codecpar->format,
+                        0);
+                // Do the conversion from the input format to the output format
+                swr_convert(resampleContext, &resampledBuffer, outSamples, (const uint8_t**)frame->extended_data, frame->nb_samples);
+
+                // We need the buffer size to create a packet from the buffer
+                int resampledBufferSize{av_samples_get_buffer_size(
+                        nullptr,
+                        outputStream->codecpar->channels,
+                        outSamples,
+                        (AVSampleFormat)outputStream->codecpar->format,
+                        0)};
+                if (resampledBufferSize < 0)
+                {
+                    std::cerr << "Failed to get buffer size" << '\n';
+                    continue;
+                }
+
+                AVPacket *resampledPacket{av_packet_alloc()};
+                // Create a packet from the buffer, so we can later send it to the device
+                if (av_packet_from_data(resampledPacket, resampledBuffer, resampledBufferSize))
+                {
+                    std::cerr << "Failed to create packet from buffer" << '\n';
+                    continue;
+                }
+
+                // Write the data to the output device
+                if (av_write_frame(outputFormatContext, resampledPacket) < 0)
                 {
                     std::cerr << "Failed to write packet to output device" << '\n';
                 }
 
-                // Free the packet
+                // Free stuff
                 av_packet_unref(packet);
+                av_frame_unref(frame);
+                av_packet_unref(resampledPacket);
+                swr_free(&resampleContext);
             }
 
-            std::cout << "End of stream" << '\n';
+            std::cout << "\tEnd of stream" << '\n';
 
             avcodec_free_context(&codecContext);
         }
