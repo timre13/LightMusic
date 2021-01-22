@@ -262,6 +262,12 @@ void Music::unPause()
         return;
     }
 
+    if (m_state == STATE_END)
+    {
+        std::cerr << "Failed to unpause, music ended" << '\n';
+        return;
+    }
+
     if (m_formatContext->nb_streams < 1)
     {
         std::cout << "Failed to unpause, no streams found" << '\n';
@@ -283,6 +289,12 @@ void Music::pause()
     if (m_state == STATE_UNINITIALIZED)
     {
         std::cerr << "Failed to pause, object is uninitialized." << '\n';
+        return;
+    }
+
+    if (m_state == STATE_END)
+    {
+        std::cerr << "Failed to pause, music ended" << '\n';
         return;
     }
 
