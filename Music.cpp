@@ -244,7 +244,7 @@ Music::OpenError Music::open(
     }
 
     // Opening is done
-    m_state = STATE_PAUSED;
+    m_state = STATE_PLAYING;
     return OPENERROR_OK;
 }
 
