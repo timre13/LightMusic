@@ -32,34 +32,45 @@ extern "C"
 {
 #include <libavdevice/avdevice.h>
 }
-#include "Music.h"
+#include "Playlist.h"
 
 #define VERSION_STR "pre-alpha 1.0-dev"
 #define AUDIO_DEV_NAME "alsa" // TODO: Windows compatibility
 
-//#define FILENAME "nonpublic-test-music/des.mp3"
-//#define FILENAME "nonpublic-test-music/csp.mp3"
-#define FILENAME "nonpublic-test-music/csp.wav"
-//#define FILENAME "nonpublic-test-music/csp_short.wav"
-//#define FILENAME "nonpublic-test-music/csp.ogg"
-//#define FILENAME "nonpublic-test-music/blocky.mkv"
-
-int main()
+int main(int argc, char **argv)
 {
     std::cout << "LightMusic music player version " VERSION_STR << '\n';
 
     // Init audio I/O
     avdevice_register_all();
 
-    auto music{std::make_unique<Music>()};
-    music->open(FILENAME, AUDIO_DEV_NAME);
-    music->unPause();
+    auto playlist{std::make_unique<Playlist>(AUDIO_DEV_NAME)};
 
-    while (!music->hasEnded() && !music->isInErrorState())
+    if (argc <= 1) // When running as a test
     {
-        music->tick();
+        std::cout << "Using test music files" << '\n';
+        playlist->addNewMusic("nonpublic-test-music/csp_short.wav");
+        playlist->addNewMusic("nonpublic-test-music/sd.opus");
+        playlist->addNewMusic("nonpublic-test-music/csp.wav");
+        playlist->addNewMusic("nonpublic-test-music/csp.mp3");
+        playlist->addNewMusic("nonpublic-test-music/csp.ogg");
+        playlist->addNewMusic("nonpublic-test-music/des.mp3");
+        playlist->addNewMusic("nonpublic-test-music/b.mkv");
+    }
+    else
+    {
+        for (int i{1}; i < argc; ++i)
+            playlist->addNewMusic(argv[i]);
+    }
+
+    playlist->startPlaying();
+
+    while (!playlist->hasEnded())
+    {
+        playlist->tickCurrentMusic();
     }
 
     std::cout << "========== Exit ==========" << '\n';
-    return (music->isInErrorState() ? 1 : 0);
+
+    return 0;
 }
