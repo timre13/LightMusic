@@ -47,6 +47,8 @@ void Music::reset()
     m_outputFormatContext = nullptr;
     m_outputStream        = nullptr;
     m_resampleContext     = nullptr;
+
+    std::cout << "Music reset" << '\n';
 }
 
 static void printFileInfo(const AVFormatContext *formatContext)
@@ -139,6 +141,9 @@ Music::OpenError Music::open(
         const std::string &filePath,
         const std::string &audioDevName)
 {
+    std::cout << std::string(30, '-') << " begin " << std::string(30, '-') << '\n';
+    std::cout << "Opening file: " << filePath << '\n';
+
     assert(m_state == STATE_UNINITIALIZED);
 
     m_formatContext = avformat_alloc_context();
@@ -242,6 +247,8 @@ Music::OpenError Music::open(
         m_state = STATE_ERROR;
         return OPENERROR_OTHER;
     }
+
+    std::cout << "Successfully opened file and found audio stream" << '\n';
 
     // Opening is done
     m_state = STATE_PLAYING;
@@ -436,14 +443,18 @@ void Music::tick()
 
 void Music::closeAndReset()
 {
-    // TODO: Should we check if they are not invalid/null?
-    avformat_close_input(&m_formatContext);
-    avcodec_free_context(&m_codecContext);
-    swr_free(&m_resampleContext);
+    if (m_state != STATE_UNINITIALIZED)
+    {
+        avformat_close_input(&m_formatContext);
+        avcodec_free_context(&m_codecContext);
+        swr_free(&m_resampleContext);
 
-    std::cout << "File closed" << '\n';
+        std::cout << "File closed" << '\n';
 
-    reset();
+        reset();
+    }
+
+    std::cout << std::string(30, '-') << " end " << std::string(30, '-') << '\n';
 }
 
 Music::~Music()
