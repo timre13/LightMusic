@@ -77,7 +77,7 @@ public:
 private:
     State           m_state{};
     AVFormatContext *m_formatContext{};
-    int             m_audioStreamIndex{};
+    AVCodec         *m_codec{};
     AVCodecContext  *m_codecContext{};
     AVOutputFormat  *m_outputFormat{};
     AVFormatContext *m_outputFormatContext{};

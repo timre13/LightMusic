@@ -41,7 +41,7 @@ void Music::reset()
     m_state = STATE_UNINITIALIZED;
 
     m_formatContext       = nullptr;
-    m_audioStreamIndex    = -1;
+    m_codec               = nullptr;
     m_codecContext        = nullptr;
     m_outputFormat        = nullptr;
     m_outputFormatContext = nullptr;
@@ -177,8 +177,8 @@ Music::OpenError Music::open(
     {
         auto codecParameters{m_formatContext->streams[i]->codecpar};
         // Find a codec for the stream
-        auto codec{avcodec_find_decoder(codecParameters->codec_id)};
-        if (!codec)
+        m_codec = avcodec_find_decoder(codecParameters->codec_id);
+        if (!m_codec)
         {
             std::cerr << "Failed to find decoder for stream, skipping" << '\n';
             continue;
@@ -186,12 +186,12 @@ Music::OpenError Music::open(
 
         // Print info of the stream
         std::cout << "Stream #" << i << ":" << '\n';
-        std::cout << "\tCodec name: " << codec->long_name << '\n';
-        std::cout << "\tCodec ID: " << codec->id << '\n';
+        std::cout << "\tCodec name: " << m_codec->long_name << '\n';
+        std::cout << "\tCodec ID: " << m_codec->id << '\n';
         std::cout << "\tBit rate: " << codecParameters->bit_rate << '\n';
 
-        // If this is an audio stream
-        if (codec->type != AVMEDIA_TYPE_AUDIO)
+        // If this is not an audio stream
+        if (m_codec->type != AVMEDIA_TYPE_AUDIO)
         {
             std::cout << "\tNot an audio stream, skipping" << '\n';
             continue;
@@ -200,7 +200,7 @@ Music::OpenError Music::open(
         std::cout << "\tChannels: " << codecParameters->channels << '\n';
         std::cout << "\tSample rate: " << codecParameters->sample_rate << '\n';
 
-        m_codecContext = avcodec_alloc_context3(codec);
+        m_codecContext = avcodec_alloc_context3(m_codec);
         if (!m_codecContext)
         {
             std::cerr << "\tFailed to allocate codec context, skipping" << '\n';
@@ -220,12 +220,15 @@ Music::OpenError Music::open(
                 sizeof(sampleFormatStr),
                 m_codecContext->sample_fmt) << '\n';
 
-        if (avcodec_open2(m_codecContext, codec, nullptr))
+        if (avcodec_open2(m_codecContext, m_codec, nullptr))
         {
             std::cerr << "Failed to open codex context, skipping" << '\n';
             avcodec_free_context(&m_codecContext);
             continue;
         }
+
+        // TODO: Isn't this ugly?
+        break;
     }
 
     if (openAudioDevice(audioDevName))
