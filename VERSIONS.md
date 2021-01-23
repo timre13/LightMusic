@@ -14,3 +14,8 @@
 
 ## Pre-alpha 1.0-dev #3: 2020.01.19
     * Convert input format to output device's format (MP3 finally works!)
+
+## Pre-alpha 1.0-dev #4: 2020.01.22:
+    * Refactored
+    * Implemented playlist
+    * Some fixes done
