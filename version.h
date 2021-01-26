@@ -26,50 +26,9 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <iostream>
-#include <memory>
-extern "C"
-{
-#include <libavdevice/avdevice.h>
-}
-#include <FL/Fl.H>
-#include "Playlist.h"
-#include "MainWindow.h"
-#include "version.h"
+#pragma once
 
-#define AUDIO_DEV_NAME "alsa" // TODO: Windows compatibility
-
-int main(int argc, char **argv)
-{
-    std::cout << "LightMusic music player version " VERSION_STR << '\n';
-
-    // Init audio I/O
-    avdevice_register_all();
-
-    auto playlist{std::make_unique<Playlist>(AUDIO_DEV_NAME)};
-
-    if (argc <= 1) // When running as a test
-    {
-        std::cout << "Using test music files" << '\n';
-        playlist->addNewTrack("nonpublic-test-music/csp_short.wav");
-        playlist->addNewTrack("nonpublic-test-music/sd.opus");
-        playlist->addNewTrack("nonpublic-test-music/csp.wav");
-        playlist->addNewTrack("nonpublic-test-music/csp.mp3");
-        playlist->addNewTrack("nonpublic-test-music/csp.ogg");
-        playlist->addNewTrack("nonpublic-test-music/des.mp3");
-        playlist->addNewTrack("nonpublic-test-music/b.mkv");
-    }
-    else
-    {
-        for (int i{1}; i < argc; ++i)
-            playlist->addNewTrack(argv[i]);
-    }
-
-    playlist->startPlaying();
-
-    auto mainWindow{new MainWindow{800, 400, "LightMusic", playlist.get()}};
-    mainWindow->resizable(mainWindow);
-    mainWindow->show();
-
-    return Fl::run();
-}
+/*
+ * Version of LightMusic.
+ */
+#define VERSION_STR "alpha 1.0-dev"
