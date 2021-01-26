@@ -19,3 +19,16 @@
     * Refactored
     * Implemented playlist
     * Some fixes done
+
+## Alpha 1.0-dev: 2020.01.26:
+    * Refactored `Music`
+    * Refactored `Playlist`
+    * Added new getters to `Music`
+    * Added new getters to `Playlist`
+    * Implemented GUI
+        * Shows tracks in playlist (mark currently playing)
+        * Shows track info
+        * Pausing/playing
+        * Jumping to next/previous track
+        * Shows progress in current track as a slider
+        * Shows elapsed/full length of track
