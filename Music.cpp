@@ -30,6 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <iostream>
 #include <cassert>
+#include <sstream>
 
 Music::Music()
 {
@@ -41,27 +42,62 @@ void Music::reset()
     m_state = STATE_UNINITIALIZED;
 
     m_formatContext       = nullptr;
+    m_codecParams         = nullptr;
     m_codec               = nullptr;
     m_codecContext        = nullptr;
     m_outputFormat        = nullptr;
     m_outputFormatContext = nullptr;
     m_outputStream        = nullptr;
     m_resampleContext     = nullptr;
+    m_currentPacket       = nullptr;
 
     std::cout << "Music reset" << '\n';
 }
 
-static void printFileInfo(const AVFormatContext *formatContext)
+static std::string getFileInfo(const AVFormatContext *formatContext)
 {
-    // Print some info
-    std::cout << "Filename/url: " << formatContext->url << '\n';
-    std::cout << "Metadata:" << '\n';
-    AVDictionaryEntry *metadataTag{nullptr};
-    while ((metadataTag = av_dict_get(formatContext->metadata, "", metadataTag, AV_DICT_IGNORE_SUFFIX)))
-        std::cout << "\t" << metadataTag->key << ": " << metadataTag->value << '\n';
-    std::cout << "Format: " << formatContext->iformat->long_name << '\n';
-    std::cout << "Duration: " << (long double)formatContext->duration / AV_TIME_BASE << "s" << '\n';
-    std::cout << "Bit rate: " << formatContext->bit_rate << '\n';
+    if (!formatContext)
+        return "";
+
+    std::stringstream output;
+
+    if (formatContext->metadata)
+    {
+        output << "Metadata:" << '\n';
+        AVDictionaryEntry *metadataTag{nullptr};
+        while ((metadataTag = av_dict_get(formatContext->metadata, "", metadataTag, AV_DICT_IGNORE_SUFFIX)))
+            output << "    " << metadataTag->key << ": " << metadataTag->value << '\n';
+    }
+    output << "Format:   " << formatContext->iformat->long_name << '\n';
+    output << "Duration: " << (long double)formatContext->duration / AV_TIME_BASE << "s" << '\n';
+    output << "Bit rate: " << formatContext->bit_rate << '\n';
+
+    return output.str();
+}
+
+static std::string getStreamInfo(const AVCodecParameters *codecParams, const AVCodec *codec, const AVCodecContext *codecContext)
+{
+    if (!codecParams || !codec || !codecContext)
+        return "";
+
+    std::stringstream output;
+
+    output << "    Codec name: " << codec->long_name << '\n';
+    output << "    Bit rate: " << codecParams->bit_rate << '\n';
+
+    if (codec->type == AVMEDIA_TYPE_AUDIO)
+    {
+        output << "    Channels: " << codecParams->channels << '\n';
+        output << "    Sample rate: " << codecParams->sample_rate << '\n';
+    }
+
+    char sampleFormatStr[32];
+    output << "    Sample format: " << av_get_sample_fmt_string(
+            sampleFormatStr,
+            sizeof(sampleFormatStr),
+            codecContext->sample_fmt) << '\n';
+
+    return output.str();
 }
 
 int Music::openAudioDevice(const std::string &audioDevName)
@@ -166,7 +202,7 @@ Music::OpenError Music::open(
         return OPENERROR_FILE;
     }
 
-    printFileInfo(m_formatContext);
+    std::cout << ::getFileInfo(m_formatContext);
 
     // Find the info of the streams, so we can use them
     if (avformat_find_stream_info(m_formatContext, nullptr))
@@ -180,20 +216,17 @@ Music::OpenError Music::open(
     // Loop through the streams
     for (unsigned int i{}; i < m_formatContext->nb_streams; ++i)
     {
-        auto codecParameters{m_formatContext->streams[i]->codecpar};
+        m_codecParams = m_formatContext->streams[i]->codecpar;
         // Find a codec for the stream
-        m_codec = avcodec_find_decoder(codecParameters->codec_id);
+        m_codec = avcodec_find_decoder(m_codecParams->codec_id);
         if (!m_codec)
         {
             std::cerr << "Failed to find decoder for stream, skipping" << '\n';
             continue;
         }
 
-        // Print info of the stream
+        // Print stream index
         std::cout << "Stream #" << i << ":" << '\n';
-        std::cout << "\tCodec name: " << m_codec->long_name << '\n';
-        std::cout << "\tCodec ID: " << m_codec->id << '\n';
-        std::cout << "\tBit rate: " << codecParameters->bit_rate << '\n';
 
         // If this is not an audio stream
         if (m_codec->type != AVMEDIA_TYPE_AUDIO)
@@ -202,9 +235,6 @@ Music::OpenError Music::open(
             continue;
         }
 
-        std::cout << "\tChannels: " << codecParameters->channels << '\n';
-        std::cout << "\tSample rate: " << codecParameters->sample_rate << '\n';
-
         m_codecContext = avcodec_alloc_context3(m_codec);
         if (!m_codecContext)
         {
@@ -212,22 +242,19 @@ Music::OpenError Music::open(
             continue;
         }
 
-        if (avcodec_parameters_to_context(m_codecContext, codecParameters))
+        if (avcodec_parameters_to_context(m_codecContext, m_codecParams))
         {
             std::cerr << "\tFailed to fill codex context, skipping" << '\n';
             avcodec_free_context(&m_codecContext);
             continue;
         }
 
-        char sampleFormatStr[32];
-        std::cout << "\tSample format: " << av_get_sample_fmt_string(
-                sampleFormatStr,
-                sizeof(sampleFormatStr),
-                m_codecContext->sample_fmt) << '\n';
+        // Print info of the stream
+        std::cout << getStreamInfo(m_codecParams, m_codec, m_codecContext);
 
         if (avcodec_open2(m_codecContext, m_codec, nullptr))
         {
-            std::cerr << "Failed to open codex context, skipping" << '\n';
+            std::cerr << "\tFailed to open codex context, skipping" << '\n';
             avcodec_free_context(&m_codecContext);
             continue;
         }
@@ -391,34 +418,36 @@ void Music::tick()
     }
 
     AVFrame *frame{av_frame_alloc()};
-    AVPacket *packet{av_packet_alloc()};
+    av_packet_free(&m_currentPacket);
+    m_currentPacket = av_packet_alloc();
 
     // Read a frame
     // FIXME: End of stream detection is buggy
-    if (av_read_frame(m_formatContext, packet) < 0)
+    if (av_read_frame(m_formatContext, m_currentPacket) < 0)
     {
         // End of stream
 
         std::cout << "End of stream" << '\n';
         av_write_frame(m_outputFormatContext, nullptr); // Flush the buffer
         av_frame_free(&frame);
-        av_packet_free(&packet);
         m_state = STATE_END;
         return;
     }
 
     // Send the packet to the codec
-    if (avcodec_send_packet(m_codecContext, packet))
+    if (avcodec_send_packet(m_codecContext, m_currentPacket))
     {
         std::cerr << "Failed to send packet to codec" << '\n';
+        av_frame_free(&frame);
         return; // Maybe next time
     }
 
-    // Get decoded output data from codec
+    // Get decoded output data from codecfree
     // TODO: Handle error depending on the return code
     if (avcodec_receive_frame(m_codecContext, frame))
     {
         std::cerr << "Failed to receive frame from codec" << '\n';
+        av_frame_free(&frame);
         return; // Maybe next time
     }
 
@@ -434,19 +463,32 @@ void Music::tick()
         {
             std::cerr << "Failed to write packet to output device" << '\n';
         }
-
-        av_packet_unref(resampledFrame);
+        av_packet_free(&resampledFrame);
     }
-    av_packet_unref(packet);
-    av_frame_unref(frame);
+    av_frame_free(&frame);
+}
+
+std::string Music::getFileInfo() const
+{
+    return ::getFileInfo(m_formatContext);
+}
+
+std::string Music::getAudioStreamInfo() const
+{
+    return getStreamInfo(m_codecParams, m_codec, m_codecContext);
 }
 
 void Music::closeAndReset()
 {
     if (m_state != STATE_UNINITIALIZED)
     {
-        avformat_close_input(&m_formatContext);
+        if (m_outputFormatContext)
+            av_write_frame(m_outputFormatContext, nullptr); // Flush the buffer
+
         avcodec_free_context(&m_codecContext);
+        avformat_free_context(m_outputFormatContext);
+        avformat_close_input(&m_formatContext);
+        av_packet_free(&m_currentPacket);
         swr_free(&m_resampleContext);
 
         std::cout << "File closed" << '\n';

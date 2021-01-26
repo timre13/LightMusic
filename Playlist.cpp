@@ -34,7 +34,7 @@ Playlist::Playlist(const std::string &audioDevName)
 {
 }
 
-void Playlist::openMusicAtIndex(size_t index)
+void Playlist::openTrackAtIndex(size_t index)
 {
     // If playlist is empty
     if (m_filePaths.size() < 1)
@@ -48,19 +48,19 @@ void Playlist::openMusicAtIndex(size_t index)
     }
 
     // If music is not in its clean state
-    if (m_currentMusic->getState() != Music::STATE_UNINITIALIZED)
+    if (m_currentTrack->getState() != Music::STATE_UNINITIALIZED)
     {
-        m_currentMusic->closeAndReset();
+        m_currentTrack->closeAndReset();
     }
 
-    if (m_currentMusic->open(m_filePaths[index], m_audioDevName))
+    if (m_currentTrack->open(m_filePaths[index], m_audioDevName))
     {
         // If failed to open music at the current index, try the next one
-        openMusicAtIndex(index + 1);
+        openTrackAtIndex(index + 1);
     }
     else
     {
-        m_currentMusicIndex = index;
+        m_currentTrackIndex = index;
     }
 }
 
@@ -70,33 +70,33 @@ void Playlist::startPlaying()
     if (m_filePaths.size() < 1)
         return;
 
-    if (m_currentMusic->getState() == m_currentMusic->STATE_UNINITIALIZED)
-        openMusicAtIndex(m_currentMusicIndex);
-    m_currentMusic->unPause();
+    if (m_currentTrack->getState() == m_currentTrack->STATE_UNINITIALIZED)
+        openTrackAtIndex(m_currentTrackIndex);
+    m_currentTrack->unPause();
 }
 
-void Playlist::tickCurrentMusic()
+void Playlist::tickCurrentTrack()
 {
     // If playlist is empty
     if (m_filePaths.size() < 1)
         return;
 
     // If music ended or errored out
-    if (m_currentMusic->hasEnded() || m_currentMusic->isInErrorState())
+    if (m_currentTrack->hasEnded() || m_currentTrack->isInErrorState())
     {
         std::cout << "Current music has ended or errored out, opening next one" << '\n';
 
         // Play the next music
-        ++m_currentMusicIndex;
+        ++m_currentTrackIndex;
         // If the music index is valid
-        if (m_currentMusicIndex < m_filePaths.size())
-            openMusicAtIndex(m_currentMusicIndex);
+        if (m_currentTrackIndex < m_filePaths.size())
+            openTrackAtIndex(m_currentTrackIndex);
     }
 
     // If the music index is valid
-    if (m_currentMusicIndex < m_filePaths.size())
+    if (m_currentTrackIndex < m_filePaths.size())
     {
-        m_currentMusic->tick();
+        m_currentTrack->tick();
     }
     // End of playlist
     else
