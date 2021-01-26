@@ -44,9 +44,9 @@ private:
     // filenames and open them on-the-fly
     std::vector<std::string> m_filePaths;
     // Index of currently played music in the playlist
-    size_t m_currentMusicIndex{};
+    size_t m_currentTrackIndex{};
     // Currently played music
-    Music *m_currentMusic{new Music};
+    Music *m_currentTrack{new Music};
 
 public:
     Playlist(const std::string &audioDevName);
@@ -55,23 +55,28 @@ public:
     Playlist& operator=(const Playlist&) = delete;
     Playlist& operator=(Playlist&&) = delete;
 
-    inline void addNewMusic(const std::string &filePath) { m_filePaths.push_back(filePath); }
-    inline size_t getNumOfItems() const { return m_filePaths.size(); }
-    inline int getCurrentMusicIndex() const { return m_currentMusicIndex; }
+    inline void addNewTrack(const std::string &filePath) { m_filePaths.push_back(filePath); }
 
-    void openMusicAtIndex(size_t index);
+    inline size_t getNumOfTracks() const { return m_filePaths.size(); }
+    inline int getCurrentTrackIndex() const { return m_currentTrackIndex; }
+    inline std::string getTrackFilepathAt(size_t index) { return m_filePaths[index]; }
+    inline std::string getCurrentTrackName() { return m_filePaths.size() == 0 ? "" : m_filePaths[m_currentTrackIndex]; }
+    inline bool isPlaying() { return m_currentTrack->getState() == Music::STATE_PLAYING; }
+    bool hasEnded() const { return m_currentTrackIndex >= m_filePaths.size(); }
+
+    Music* getCurrentTrack() { return m_currentTrack; }
+
+    void openTrackAtIndex(size_t index);
     void startPlaying();
 
-    void tickCurrentMusic();
+    void tickCurrentTrack();
 
-    bool hasEnded() const { return m_currentMusicIndex >= m_filePaths.size(); }
+    void unpauseCurrentTrack();
+    void pauseCurrentTrack();
 
-    void unpauseCurrentMusic();
-    void pauseCurrentMusic();
-
-    inline void jumpToNextMusic() { openMusicAtIndex(m_currentMusicIndex + 1); }
-    inline void jumpToPrevMusic() { openMusicAtIndex(m_currentMusicIndex - 1); }
-    inline void reloadCurrentMusic() { openMusicAtIndex(m_currentMusicIndex); }
+    void jumpToPrevTrack();
+    void jumpToNextTrack();
+    void reloadCurrentTrack();
 
     ~Playlist();
 };

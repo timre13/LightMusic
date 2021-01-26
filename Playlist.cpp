@@ -105,14 +105,32 @@ void Playlist::tickCurrentTrack()
     }
 }
 
-void Playlist::unpauseCurrentMusic()
+void Playlist::unpauseCurrentTrack()
 {
-    m_currentMusic->unPause();
+    m_currentTrack->unPause();
 }
 
-void Playlist::pauseCurrentMusic()
+void Playlist::pauseCurrentTrack()
 {
-    m_currentMusic->pause();
+    m_currentTrack->pause();
+}
+
+void Playlist::jumpToPrevTrack()
+{
+    if (m_filePaths.size() < 1)
+        return;
+
+    openTrackAtIndex(m_currentTrackIndex == 0 ? 0 : m_currentTrackIndex - 1);
+}
+
+void Playlist::jumpToNextTrack()
+{
+    openTrackAtIndex(m_currentTrackIndex + 1);
+}
+
+void Playlist::reloadCurrentTrack()
+{
+    openTrackAtIndex(m_currentTrackIndex);
 }
 
 Playlist::~Playlist()
