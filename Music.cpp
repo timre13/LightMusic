@@ -263,6 +263,14 @@ Music::OpenError Music::open(
         break;
     }
 
+    if (!m_codecContext)
+    {
+        std::cout << "No audio stream found" << '\n';
+        avcodec_free_context(&m_codecContext);
+        m_state = STATE_ERROR;
+        return OPENERROR_FILE;
+    }
+
     if (openAudioDevice(audioDevName))
     {
         m_state = STATE_ERROR;
