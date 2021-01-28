@@ -57,7 +57,7 @@ void Music::reset()
 static std::string getFileInfo(const AVFormatContext *formatContext)
 {
     if (!formatContext)
-        return "";
+        return "N/A\n";
 
     std::stringstream output;
 
@@ -78,7 +78,7 @@ static std::string getFileInfo(const AVFormatContext *formatContext)
 static std::string getStreamInfo(const AVCodecParameters *codecParams, const AVCodec *codec, const AVCodecContext *codecContext)
 {
     if (!codecParams || !codec || !codecContext)
-        return "";
+        return "    N/A\n";
 
     std::stringstream output;
 
