@@ -3,4 +3,5 @@ Release/
 .cproject
 .project
 .settings/
-nonpublic-test-music
+nonpublic-test-music/
+build/
