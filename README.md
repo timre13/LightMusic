@@ -1,5 +1,36 @@
 # LightMusic
 
-A lightweight music player.
+![Icon](img/icon.png)
 
-**WIP**
+A lightweight music player. It is written in C++, uses
+`libav` (ffmpeg fork) for handling audio and `FLTK` for GUI.
+
+![Screenshot](docs/img/sshot1.png)
+
+# Building
+
+Dependencies:
+* libavformat
+* libavcodec
+* libavdevice
+* libavutil
+* libswresample
+* libfltk1.3
+* libfltk-images1.3
+
+To install them on Debian Linux:
+```sh
+sudo apt install libavformat-dev libavcodec-dev libavdevice-dev libavutil-dev libswresample-dev libfltk1.3-dev libfltk-images1.3
+```
+
+Compiling:
+Open the terminal in the folder where the source code is.
+
+Execute these commands:
+```sh
+mkdir build # Create a directory to build in
+cd build # Step into it
+cmake .. # Generate build files
+make -jx # Compile (replace x with the number of threads to use)
+```
+After building, the binary can be found in the same directory.
