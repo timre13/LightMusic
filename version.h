@@ -31,4 +31,4 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /*
  * Version of LightMusic.
  */
-#define VERSION_STR "alpha 1.0-dev"
+#define VERSION_STR "alpha 1.5-dev"
