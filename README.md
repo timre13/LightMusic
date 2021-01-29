@@ -5,6 +5,9 @@
 A lightweight music player. It is written in C++, uses
 `libav` (ffmpeg fork) for handling audio and `FLTK` for GUI.
 
+![Screenshot](docs/img/sshot2.png)
+
+(Older screenshot with the old about dialog:)
 ![Screenshot](docs/img/sshot1.png)
 
 # Building
