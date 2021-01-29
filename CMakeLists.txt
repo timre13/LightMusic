@@ -32,6 +32,8 @@ ADD_EXECUTABLE(lightmusic
     Playlist.cpp
     MainWindow.h
     MainWindow.cpp
+    AboutWindow.h
+    AboutWindow.cpp
     sys-specific.h
     license.h 
     version.h

@@ -37,6 +37,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <FL/Fl_Text_Display.H>
 #include <FL/Fl_Hor_Nice_Slider.H>
 #include "Playlist.h"
+#include "AboutWindow.h"
 
 /*
  *
@@ -60,6 +61,8 @@ private:
     Fl_Hor_Nice_Slider *m_progressBar{};
 
     Playlist *m_playlistPtr{};
+
+    bool m_isAboutWindowShown{};
 
     static void s_tickMusic(void *t) { static_cast<MainWindow*>(t)->tickMusic(); }
     void tickMusic();
@@ -97,7 +100,7 @@ private:
     }
     void onNextTrackButtonPressed();
 
-    void showAboutDialog() const;
+    void showAboutDialog();
 
 public:
     MainWindow(int w, int h, const char *title, Playlist *playlistPtr);

@@ -27,7 +27,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "MainWindow.h"
-//#include "license.h"
+#include "AboutWindow.h"
 #include "version.h"
 #include "sys-specific.h"
 #include <string>
@@ -196,14 +196,20 @@ int MainWindow::handle(int event)
     return this->Fl_Double_Window::handle(event);
 }
 
-void MainWindow::showAboutDialog() const
+void MainWindow::showAboutDialog()
 {
-    fl_message_hotspot(false);
-    fl_message_title("About LightMusic");
-    // TODO: Create a custom about dialog with the license as scrolling text
-    fl_message(
-            "LightMusic music player " VERSION_STR
-            ".\n\nSee the file LICENSE.md for the license.");
+    if (!m_isAboutWindowShown)
+    {
+        m_isAboutWindowShown = true;
+
+        auto dialog{std::make_unique<AboutWindow>()};
+        dialog->set_modal();
+        dialog->show();
+        while (dialog->shown())
+            Fl::wait();
+
+        m_isAboutWindowShown = false;
+    }
 }
 
 MainWindow::~MainWindow()
