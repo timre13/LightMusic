@@ -5,3 +5,4 @@ Release/
 .settings/
 nonpublic-test-music/
 build/
+*.desktop
