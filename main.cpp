@@ -67,8 +67,8 @@ int main(int argc, char **argv)
 
     playlist->startPlaying();
 
-    auto mainWindow{new MainWindow{800, 400, "LightMusic", playlist.get()}};
-    mainWindow->resizable(mainWindow);
+    auto mainWindow{std::make_unique<MainWindow>(800, 400, "LightMusic", playlist.get())};
+    mainWindow->resizable(mainWindow.get());
     mainWindow->show();
 
     return Fl::run();
