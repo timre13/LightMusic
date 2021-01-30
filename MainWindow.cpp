@@ -54,8 +54,9 @@ MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
     m_trackInfoW->set_output();
     m_trackInfoW->end();
 
-    m_playlistW = new Fl_Browser{m_trackInfoW->w(), 0, w-m_trackInfoW->w(), m_trackInfoW->h()};
+    m_playlistW = new Fl_Select_Browser{m_trackInfoW->w(), 0, w-m_trackInfoW->w(), m_trackInfoW->h()};
     m_playlistW->end();
+    m_playlistW->callback(&s_playlistWidgetCallback, this);
 
     m_ctrlBtnGrp = new Fl_Group{0, m_trackInfoW->h(), 180, h-m_trackInfoW->h()};
     m_ctrlBtnGrp->end();
@@ -150,7 +151,7 @@ void MainWindow::updateGui()
     trackInfoBuffer += currentTrack->getAudioStreamInfo();
         m_trackInfoBuffer->text(trackInfoBuffer.c_str());
 
-    Fl::repeat_timeout(0.1, s_updateGui, this);
+    Fl::repeat_timeout(0.5, s_updateGui, this);
 }
 
 void MainWindow::onPlayPauseButtonPressed()
@@ -178,6 +179,16 @@ void MainWindow::onNextTrackButtonPressed()
 {
     m_playlistPtr->jumpToNextTrack();
     setPlayPauseButtonToPause();
+}
+
+void MainWindow::playlistWidgetCallback()
+{
+    int selectedLine{m_playlistW->value()};
+    if (selectedLine == 0) // If no line selected, don't change track
+        return;
+
+    m_playlistPtr->openTrackAtIndex(selectedLine-1);
+    m_playlistW->select(selectedLine);
 }
 
 int MainWindow::handle(int event)

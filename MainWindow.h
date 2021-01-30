@@ -31,7 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 #include <FL/Fl_Double_Window.H>
 #include <FL/Fl_Group.H>
-#include <FL/Fl_Browser.H>
+#include <FL/Fl_Select_Browser.H>
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Text_Buffer.H>
 #include <FL/Fl_Text_Display.H>
@@ -48,7 +48,7 @@ private:
     Fl_Text_Buffer *m_trackInfoBuffer{};
     Fl_Text_Display *m_trackInfoW{};
 
-    Fl_Browser *m_playlistW{};
+    Fl_Select_Browser *m_playlistW{};
 
     Fl_Group  *m_ctrlBtnGrp{};
     Fl_Button *m_playPauseBtn{};
@@ -99,6 +99,12 @@ private:
         static_cast<MainWindow*>(t)->onNextTrackButtonPressed();
     }
     void onNextTrackButtonPressed();
+
+    static void s_playlistWidgetCallback(Fl_Widget*, void *t)
+    {
+        static_cast<MainWindow*>(t)->playlistWidgetCallback();
+    }
+    void playlistWidgetCallback();
 
     void showAboutDialog();
 
