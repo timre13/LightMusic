@@ -85,6 +85,7 @@ private:
     AVStream          *m_outputStream{};
     SwrContext        *m_resampleContext{};
     AVPacket          *m_currentPacket{};
+    int               m_audioStreamI{};
 
 private:
     /*
@@ -152,11 +153,17 @@ public:
      */
     void reset();
 
+    /*
+     * Seek to the specified second.
+     */
+    void seekToS(double timestamp);
+
     inline State getState() const { return m_state; }
     inline bool hasEnded() const { return m_state == STATE_END; }
     inline bool isInErrorState() const { return m_state == STATE_ERROR; }
 
     inline int64_t getDurationS() const { return m_formatContext ? m_formatContext->duration/AV_TIME_BASE : 0; }
+    // FIXME: MP3 timestamps are weird
     inline int64_t getCurrentTimestampS() const { return m_currentPacket ? m_currentPacket->pts * av_q2d(m_outputStream->time_base) : 0; }
     std::string getFileInfo() const;
     std::string getAudioStreamInfo() const;

@@ -50,6 +50,7 @@ void Music::reset()
     m_outputStream        = nullptr;
     m_resampleContext     = nullptr;
     m_currentPacket       = nullptr;
+    m_audioStreamI        = 0;
 
     std::cout << "Music reset" << '\n';
 }
@@ -258,6 +259,8 @@ Music::OpenError Music::open(
             avcodec_free_context(&m_codecContext);
             continue;
         }
+
+        m_audioStreamI = i;
 
         // TODO: Isn't this ugly?
         break;
@@ -484,6 +487,14 @@ std::string Music::getFileInfo() const
 std::string Music::getAudioStreamInfo() const
 {
     return getStreamInfo(m_codecParams, m_codec, m_codecContext);
+}
+
+void Music::seekToS(double timestamp)
+{
+    // FIXME: Maybe this is broken when used with MP3. (weird timestamps, see: `getCurrentTimestampS()`)
+    //                                                         VVVVVVV - AV_TIME_BASE
+    //                                                                   VV - ???
+    av_seek_frame(m_formatContext, m_audioStreamI, timestamp * 1000000 / 21, AVSEEK_FLAG_FRAME);
 }
 
 void Music::closeAndReset()

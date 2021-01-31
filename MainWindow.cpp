@@ -71,6 +71,7 @@ MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
 
     m_progressBar = new Fl_Hor_Nice_Slider{m_ctrlBtnGrp->w()+10, m_trackInfoW->h()+35, w-m_ctrlBtnGrp->w()-20, 20};
     m_progressBar->minimum(0.0);
+    m_progressBar->callback(&s_progressBarCallback, this);
 
     end();
 
@@ -189,6 +190,11 @@ void MainWindow::playlistWidgetCallback()
 
     m_playlistPtr->openTrackAtIndex(selectedLine-1);
     m_playlistW->select(selectedLine);
+}
+
+void MainWindow::progressBarCallback()
+{
+    m_playlistPtr->getCurrentTrack()->seekToS(m_progressBar->value());
 }
 
 int MainWindow::handle(int event)

@@ -106,6 +106,12 @@ private:
     }
     void playlistWidgetCallback();
 
+    static void s_progressBarCallback(Fl_Widget*, void *t)
+    {
+        static_cast<MainWindow*>(t)->progressBarCallback();
+    }
+    void progressBarCallback();
+
     void showAboutDialog();
 
 public:
