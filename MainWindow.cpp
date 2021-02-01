@@ -33,6 +33,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <iostream>
 #include <filesystem>
+#include <sstream>
+#include <iomanip>
 #include <FL/Fl_PNG_Image.H>
 #include <FL/fl_ask.H>
 
@@ -118,9 +120,13 @@ void MainWindow::tickMusic()
 
 static std::string timeToString(int64_t timeInSeconds)
 {
-    return std::to_string(timeInSeconds/60/60) + ":" +
-           std::to_string(timeInSeconds%(60*60)/60) + ":" +
-           std::to_string(timeInSeconds%60);
+    std::stringstream ss;
+    ss << std::setfill('0') <<
+        std::setw(2) << timeInSeconds / 60 / 60 << ':' <<
+        std::setw(2) << timeInSeconds % (60 * 60) / 60 << ':' <<
+        std::setw(2) << timeInSeconds % 60;
+
+    return ss.str();
 }
 
 void MainWindow::updateGui()
