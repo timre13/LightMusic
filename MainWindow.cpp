@@ -195,6 +195,24 @@ void MainWindow::playlistWidgetCallback()
 void MainWindow::progressBarCallback()
 {
     m_playlistPtr->getCurrentTrack()->seekToS(m_progressBar->value());
+
+    // We tick the track to update the internal state, so
+    // updateGui() gets the actual timestamp, not the old one
+    if (!m_playlistPtr->isPlaying())
+    {
+        // Cannot tick if paused, so unpause
+        m_playlistPtr->unpauseCurrentTrack();
+        m_playlistPtr->tickCurrentTrack();
+        // Pause it, it was the original state
+        m_playlistPtr->pauseCurrentTrack();
+    }
+    else
+    {
+        m_playlistPtr->tickCurrentTrack();
+    }
+
+    // Update the `remaining time widget` and the progressbar
+    updateGui();
 }
 
 int MainWindow::handle(int event)
