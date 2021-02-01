@@ -38,3 +38,11 @@ ADD_EXECUTABLE(lightmusic
     license.h 
     version.h
 )
+
+# Add a "run" target, it runs lightmusic with the files in ~/Music as arguments
+ADD_CUSTOM_TARGET(run
+    DEPENDS lightmusic
+    COMMAND lightmusic ~/Music/*
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+)
+
