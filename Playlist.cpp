@@ -135,4 +135,5 @@ void Playlist::reloadCurrentTrack()
 
 Playlist::~Playlist()
 {
+    delete m_currentTrack;
 }
