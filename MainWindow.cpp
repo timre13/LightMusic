@@ -39,10 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <FL/fl_ask.H>
 
 MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
-    : Fl_Double_Window(w, h, title)
+    : Fl_Double_Window(w, h, title), m_playlistPtr{playlistPtr}
 {
-    m_playlistPtr = playlistPtr;
-
     if (!Fl::scheme("plastic"))
         std::cerr << "Failed to set scheme" << '\n';
 
