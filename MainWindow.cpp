@@ -54,22 +54,26 @@ MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
     m_trackInfoW->set_output();
     m_trackInfoW->end();
 
-    m_playlistW = new Fl_Select_Browser{m_trackInfoW->w(), 0, w-m_trackInfoW->w(), m_trackInfoW->h()};
+    m_playlistW = new Fl_Select_Browser{
+            m_trackInfoW->w(), 0, w-m_trackInfoW->w(), m_trackInfoW->h()};
     m_playlistW->end();
     m_playlistW->callback(&s_playlistWidgetCallback, this);
 
-    m_ctrlBtnGrp = new Fl_Group{0, m_trackInfoW->h(), 180, h-m_trackInfoW->h()};
+    m_ctrlBtnGrp = new Fl_Group{
+            0, m_trackInfoW->h(), 180, h-m_trackInfoW->h()};
     m_ctrlBtnGrp->end();
 
     m_timeLabelBuffer = new Fl_Text_Buffer{16};
-    m_timeLabel = new Fl_Text_Display{m_ctrlBtnGrp->w()+10, m_trackInfoW->h()+5, w-m_ctrlBtnGrp->w()-20, 20};
+    m_timeLabel = new Fl_Text_Display{
+            m_ctrlBtnGrp->w()+10, m_trackInfoW->h()+5, w-m_ctrlBtnGrp->w()-20, 20};
     m_timeLabel->buffer(m_timeLabelBuffer);
     m_timeLabel->set_output();
     m_timeLabel->box(FL_NO_BOX);
     m_timeLabel->color(FL_BACKGROUND_COLOR);
     m_timeLabelBuffer->text("00:00:00/00:00:00");
 
-    m_progressBar = new Fl_Hor_Nice_Slider{m_ctrlBtnGrp->w()+10, m_trackInfoW->h()+35, w-m_ctrlBtnGrp->w()-20, 20};
+    m_progressBar = new Fl_Hor_Nice_Slider{
+            m_ctrlBtnGrp->w()+10, m_trackInfoW->h()+35, w-m_ctrlBtnGrp->w()-20, 20};
     m_progressBar->minimum(0.0);
     m_progressBar->callback(&s_progressBarCallback, this);
 
@@ -81,16 +85,21 @@ MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
     m_prevTrackBtn->labelcolor(FL_YELLOW);
     m_prevTrackBtn->box(FL_ROUND_UP_BOX);
     m_prevTrackBtn->copy_tooltip("Jump to previous track");
-    m_playPauseBtn = new Fl_Button{m_prevTrackBtn->x()+m_prevTrackBtn->w(), m_ctrlBtnGrp->y(), 60, 60, "@||"};
+    m_playPauseBtn = new Fl_Button{
+            m_prevTrackBtn->x()+m_prevTrackBtn->w(), m_ctrlBtnGrp->y(), 60, 60, "@||"};
     m_playPauseBtn->callback(s_onPlayPauseButtonPressed, this);
     m_playPauseBtn->box(FL_ROUND_UP_BOX);
     setPlayPauseButtonToPause();
-    m_nextTrackBtn  = new Fl_Button{m_playPauseBtn->x()+m_playPauseBtn->w(), m_ctrlBtnGrp->y()+10, 40, 40, "@>>"};
+    m_nextTrackBtn  = new Fl_Button{
+        m_playPauseBtn->x()+m_playPauseBtn->w(), m_ctrlBtnGrp->y()+10,
+        40, 40, "@>>"};
     m_nextTrackBtn->callback(s_onNextTrackButtonPressed, this);
     m_nextTrackBtn->labelcolor(FL_YELLOW);
     m_nextTrackBtn->box(FL_ROUND_UP_BOX);
     m_nextTrackBtn->copy_tooltip("Jump to next track");
-    m_stopBtn       = new Fl_Button{m_nextTrackBtn->x()+m_nextTrackBtn->w(), m_ctrlBtnGrp->y()+10, 40, 40, "@square"};
+    m_stopBtn       = new Fl_Button{
+            m_nextTrackBtn->x()+m_nextTrackBtn->w(), m_ctrlBtnGrp->y()+10,
+            40, 40, "@square"};
     m_stopBtn->labelcolor(FL_RED);
     m_stopBtn->box(FL_ROUND_UP_BOX);
     m_stopBtn->copy_tooltip("Stop");
@@ -132,9 +141,16 @@ void MainWindow::updateGui()
     if (m_playlistPtr->isPlaylistChangedSinceLastTime())
     {
         m_playlistW->clear();
+
         for (size_t i{}; i < m_playlistPtr->getNumOfTracks(); ++i)
-            m_playlistW->add(m_playlistPtr->getTrackFilepathAt(i).substr(m_playlistPtr->getTrackFilepathAt(i).find_last_of('/')+1).c_str());
-        m_playlistW->select(m_playlistPtr->getCurrentTrackIndex()+1);
+        {
+            const std::string trackFilepath{
+                m_playlistPtr->getTrackFilepathAt(i)};
+            const std::string trackFilename{
+                trackFilepath.substr(trackFilepath.find_last_of('/')+1)};
+
+            m_playlistW->add(trackFilename.c_str());
+        }
     }
     if (!m_playlistW->selected(m_playlistPtr->getCurrentTrackIndex()+1))
         m_playlistW->select(m_playlistPtr->getCurrentTrackIndex()+1);

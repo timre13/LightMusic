@@ -66,17 +66,27 @@ static std::string getFileInfo(const AVFormatContext *formatContext)
     {
         output << "Metadata:" << '\n';
         AVDictionaryEntry *metadataTag{nullptr};
-        while ((metadataTag = av_dict_get(formatContext->metadata, "", metadataTag, AV_DICT_IGNORE_SUFFIX)))
-            output << "    " << metadataTag->key << ": " << metadataTag->value << '\n';
+        while (metadataTag = av_dict_get(
+                        formatContext->metadata,
+                        "",
+                        metadataTag,
+                        AV_DICT_IGNORE_SUFFIX))
+            output << "    " <<
+                metadataTag->key << ": " <<
+                metadataTag->value << '\n';
     }
     output << "Format:   " << formatContext->iformat->long_name << '\n';
-    output << "Duration: " << (long double)formatContext->duration / AV_TIME_BASE << "s" << '\n';
+    output << "Duration: " <<
+        (long double)formatContext->duration / AV_TIME_BASE << "s" << '\n';
     output << "Bit rate: " << formatContext->bit_rate << '\n';
 
     return output.str();
 }
 
-static std::string getStreamInfo(const AVCodecParameters *codecParams, const AVCodec *codec, const AVCodecContext *codecContext)
+static std::string getStreamInfo(
+        const AVCodecParameters *codecParams,
+        const AVCodec *codec,
+        const AVCodecContext *codecContext)
 {
     if (!codecParams || !codec || !codecContext)
         return "    N/A\n";
@@ -491,10 +501,15 @@ std::string Music::getAudioStreamInfo() const
 
 void Music::seekToS(double timestamp)
 {
-    // FIXME: Maybe this is broken when used with MP3. (weird timestamps, see: `getCurrentTimestampS()`)
-    //                                                         VVVVVVV - AV_TIME_BASE
-    //                                                                   VV - ???
-    av_seek_frame(m_formatContext, m_audioStreamI, timestamp * 1000000 / 21, AVSEEK_FLAG_FRAME);
+    // FIXME: Maybe this is broken when used with MP3.
+    // (weird timestamps, see: `getCurrentTimestampS()`)
+    av_seek_frame(
+            m_formatContext,
+            m_audioStreamI,
+            //          VVVVVVV - AV_TIME_BASE
+            //                    VV - ???
+            timestamp * 1000000 / 21, // Timestamp
+            AVSEEK_FLAG_FRAME);
 }
 
 void Music::closeAndReset()

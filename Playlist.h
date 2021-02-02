@@ -71,9 +71,18 @@ public:
 
     inline size_t getNumOfTracks() const { return m_filePaths.size(); }
     inline int getCurrentTrackIndex() const { return m_currentTrackIndex; }
-    inline std::string getTrackFilepathAt(size_t index) const { return m_filePaths[index]; }
-    inline std::string getCurrentTrackName() const { return m_filePaths.size() == 0 ? "" : m_filePaths[m_currentTrackIndex]; }
-    inline bool isPlaying() const { return m_currentTrack->getState() == Music::STATE_PLAYING; }
+    inline std::string getTrackFilepathAt(size_t index) const
+    {
+        return m_filePaths[index];
+    }
+    inline std::string getCurrentTrackName() const
+    {
+        return m_filePaths.size() == 0 ? "" : m_filePaths[m_currentTrackIndex];
+    }
+    inline bool isPlaying() const
+    {
+        return m_currentTrack->getState() == Music::STATE_PLAYING;
+    }
     bool hasEnded() const { return m_currentTrackIndex >= m_filePaths.size(); }
 
     Music* getCurrentTrack() { return m_currentTrack; }
