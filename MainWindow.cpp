@@ -194,6 +194,10 @@ void MainWindow::playlistWidgetCallback()
 
     m_playlistPtr->openTrackAtIndex(selectedLine-1);
     m_playlistW->select(selectedLine);
+
+    // When clicking on a track, we start playing,
+    // so update the play/pause button
+    setPlayPauseButtonToPause();
 }
 
 void MainWindow::progressBarCallback()
