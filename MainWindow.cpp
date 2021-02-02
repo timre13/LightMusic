@@ -129,8 +129,7 @@ static std::string timeToString(int64_t timeInSeconds)
 
 void MainWindow::updateGui()
 {
-    // FIXME: Breaks if track if replaced, not removed/added
-    if (m_playlistPtr->getNumOfTracks() != (size_t)m_playlistW->size())
+    if (m_playlistPtr->isPlaylistChangedSinceLastTime())
     {
         m_playlistW->clear();
         for (size_t i{}; i < m_playlistPtr->getNumOfTracks(); ++i)

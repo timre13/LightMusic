@@ -47,6 +47,8 @@ private:
     size_t m_currentTrackIndex{};
     // Currently played music
     Music *m_currentTrack{new Music};
+    // If the playlist changed since last time
+    bool m_isPlaylistChanged{true};
 
 public:
     Playlist(const std::string &audioDevName);
@@ -55,7 +57,17 @@ public:
     Playlist& operator=(const Playlist&) = delete;
     Playlist& operator=(Playlist&&) = delete;
 
-    inline void addNewTrack(const std::string &filePath) { m_filePaths.push_back(filePath); }
+    inline void addNewTrack(const std::string &filePath)
+    {
+        m_filePaths.push_back(filePath);
+        m_isPlaylistChanged = true;
+    }
+
+    inline void removeTrack(size_t index)
+    {
+        m_filePaths.erase(m_filePaths.begin() + index);
+        m_isPlaylistChanged = true;
+    }
 
     inline size_t getNumOfTracks() const { return m_filePaths.size(); }
     inline int getCurrentTrackIndex() const { return m_currentTrackIndex; }
@@ -77,6 +89,18 @@ public:
     void jumpToPrevTrack();
     void jumpToNextTrack();
     void reloadCurrentTrack();
+
+    /*
+     * Return whether the playlist has changed since the last time this
+     * function was called.
+     * If only the current index changed, it is not considered to be a change.
+     */
+    inline bool isPlaylistChangedSinceLastTime()
+    {
+        bool origVal{m_isPlaylistChanged};
+        m_isPlaylistChanged = false;
+        return origVal;
+    }
 
     ~Playlist();
 };
