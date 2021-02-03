@@ -246,7 +246,11 @@ void MainWindow::playlistWidgetCallback()
         return;
 
     m_playlistPtr->openTrackAtIndex(selectedLine-1);
-    m_playlistW->select(selectedLine);
+
+    // Hack: We first select line 1, so the next selection triggers the blue selection
+    m_playlistW->select(1);
+    // Select the track that could be opened
+    m_playlistW->select(m_playlistPtr->getCurrentTrackIndex() + 1);
 
     // When clicking on a track, we start playing,
     // so update the play/pause button
