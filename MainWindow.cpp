@@ -35,6 +35,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <filesystem>
 #include <sstream>
 #include <iomanip>
+#include <FL/Enumerations.H>
 #include <FL/Fl_PNG_Image.H>
 #include <FL/fl_ask.H>
 #include <FL/Fl_File_Chooser.H>
