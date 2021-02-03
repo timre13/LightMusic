@@ -65,7 +65,23 @@ public:
 
     inline void removeTrack(size_t index)
     {
+        if (m_filePaths.size() == 0)
+            return;
+
         m_filePaths.erase(m_filePaths.begin() + index);
+
+        // If the currently playing track needs to be removed
+        if (index == m_currentTrackIndex)
+            // Open the new current track
+            openTrackAtIndex(m_currentTrackIndex);
+
+        m_isPlaylistChanged = true;
+    }
+
+    inline void removeAllTracks()
+    {
+        m_filePaths.clear();
+        m_currentTrack->closeAndReset();
         m_isPlaylistChanged = true;
     }
 
