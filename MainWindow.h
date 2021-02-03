@@ -50,6 +50,11 @@ private:
 
     Fl_Select_Browser *m_playlistW{};
 
+    Fl_Group *m_playlistBtnGrp{};
+    Fl_Button *m_addToPlaylistBtn{};
+    Fl_Button *m_removeFromPlaylistBtn{};
+    Fl_Button *m_clearPlaylistBtn{};
+
     Fl_Group  *m_ctrlBtnGrp{};
     Fl_Button *m_playPauseBtn{};
     Fl_Button *m_prevTrackBtn{};
@@ -111,6 +116,28 @@ private:
         static_cast<MainWindow*>(t)->progressBarCallback();
     }
     void progressBarCallback();
+
+    //------------------- Playlist control button callbacks -------------------
+
+    static void s_addToPlaylistBtnCallback(Fl_Widget*, void *t)
+    {
+        static_cast<MainWindow*>(t)->addToPlaylistBtnCallback();
+    }
+    void addToPlaylistBtnCallback();
+
+    static void s_removeFromPlaylistBtnCallback(Fl_Widget*, void *t)
+    {
+        static_cast<MainWindow*>(t)->removeFromPlaylistBtnCallback();
+    }
+    void removeFromPlaylistBtnCallback();
+
+    static void s_clearPlaylistBtnCallback(Fl_Widget*, void *t)
+    {
+        static_cast<MainWindow*>(t)->clearPlaylistBtnCallback();
+    }
+    void clearPlaylistBtnCallback();
+
+    //-------------------------------------------------------------------------
 
     void showAboutDialog();
 

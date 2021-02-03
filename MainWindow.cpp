@@ -37,6 +37,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iomanip>
 #include <FL/Fl_PNG_Image.H>
 #include <FL/fl_ask.H>
+#include <FL/Fl_File_Chooser.H>
 
 MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
     : Fl_Double_Window(w, h, title), m_playlistPtr{playlistPtr}
@@ -47,7 +48,7 @@ MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
     begin();
 
     m_trackInfoBuffer = new Fl_Text_Buffer{};
-    m_trackInfoW = new Fl_Text_Display{0, 0, 300, 340};
+    m_trackInfoW = new Fl_Text_Display{0, 0, 300, 320};
     m_trackInfoW->textsize(Fl_Fontsize{12});
     m_trackInfoW->textfont(FL_SCREEN);
     m_trackInfoW->buffer(m_trackInfoBuffer);
@@ -59,13 +60,46 @@ MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
     m_playlistW->end();
     m_playlistW->callback(&s_playlistWidgetCallback, this);
 
+    //----------------------- Playlist control buttons -----------------------
+
+    m_playlistBtnGrp = new Fl_Group{
+            m_playlistW->x(), m_playlistW->h(), m_playlistW->w(), 20};
+
+    m_addToPlaylistBtn = new Fl_Button{
+            m_playlistBtnGrp->x(), m_playlistBtnGrp->y(), 20, 20};
+    m_addToPlaylistBtn->copy_label("@+");
+    m_addToPlaylistBtn->copy_tooltip("Add track to playlist...");
+    m_addToPlaylistBtn->labelcolor(FL_GREEN);
+    m_addToPlaylistBtn->callback(&s_addToPlaylistBtnCallback, this);
+
+    m_removeFromPlaylistBtn = new Fl_Button{
+            m_playlistBtnGrp->x()+20, m_playlistBtnGrp->y(), 20, 20};
+    m_removeFromPlaylistBtn->copy_label("X");
+    m_removeFromPlaylistBtn->copy_tooltip("Remove playing track from playlist");
+    m_removeFromPlaylistBtn->labelcolor(FL_RED);
+    m_removeFromPlaylistBtn->callback(&s_removeFromPlaylistBtnCallback, this);
+
+    m_clearPlaylistBtn = new Fl_Button{
+            m_playlistBtnGrp->x()+40, m_playlistBtnGrp->y(), 20, 20};
+    m_clearPlaylistBtn->copy_label("[C]");
+    m_clearPlaylistBtn->copy_tooltip("Clear playlist");
+    m_clearPlaylistBtn->color(FL_RED);
+    m_clearPlaylistBtn->labelcolor(FL_WHITE);
+    m_clearPlaylistBtn->box(FL_FLAT_BOX);
+    m_clearPlaylistBtn->callback(&s_clearPlaylistBtnCallback, this);
+
+    m_playlistBtnGrp->end();
+
+    //-------------------------------------------------------------------------
+
     m_ctrlBtnGrp = new Fl_Group{
-            0, m_trackInfoW->h(), 180, h-m_trackInfoW->h()};
+            0, m_trackInfoW->h()+m_playlistBtnGrp->h(), 180, 60};
     m_ctrlBtnGrp->end();
 
     m_timeLabelBuffer = new Fl_Text_Buffer{16};
     m_timeLabel = new Fl_Text_Display{
-            m_ctrlBtnGrp->w()+10, m_trackInfoW->h()+5, w-m_ctrlBtnGrp->w()-20, 20};
+            m_ctrlBtnGrp->w()+10, m_trackInfoW->h()+m_playlistBtnGrp->h()+5,
+            w-m_ctrlBtnGrp->w()-20, 20};
     m_timeLabel->buffer(m_timeLabelBuffer);
     m_timeLabel->set_output();
     m_timeLabel->box(FL_NO_BOX);
@@ -73,7 +107,8 @@ MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
     m_timeLabelBuffer->text("00:00:00/00:00:00");
 
     m_progressBar = new Fl_Hor_Nice_Slider{
-            m_ctrlBtnGrp->w()+10, m_trackInfoW->h()+35, w-m_ctrlBtnGrp->w()-20, 20};
+            m_ctrlBtnGrp->w()+10, m_trackInfoW->h()+m_playlistBtnGrp->h()+35,
+            w-m_ctrlBtnGrp->w()-20, 20};
     m_progressBar->minimum(0.0);
     m_progressBar->callback(&s_progressBarCallback, this);
 
@@ -91,8 +126,8 @@ MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
     m_playPauseBtn->box(FL_ROUND_UP_BOX);
     setPlayPauseButtonToPause();
     m_nextTrackBtn  = new Fl_Button{
-        m_playPauseBtn->x()+m_playPauseBtn->w(), m_ctrlBtnGrp->y()+10,
-        40, 40, "@>>"};
+            m_playPauseBtn->x()+m_playPauseBtn->w(), m_ctrlBtnGrp->y()+10,
+            40, 40, "@>>"};
     m_nextTrackBtn->callback(s_onNextTrackButtonPressed, this);
     m_nextTrackBtn->labelcolor(FL_YELLOW);
     m_nextTrackBtn->box(FL_ROUND_UP_BOX);
@@ -237,6 +272,38 @@ void MainWindow::progressBarCallback()
     // Update the `remaining time widget` and the progressbar
     updateGui();
 }
+
+//--------------------- Playlist control button callbacks ---------------------
+
+void MainWindow::addToPlaylistBtnCallback()
+{
+    auto filepath = fl_file_chooser("Select a file...", "", "*");
+    if (filepath)
+    {
+        m_playlistPtr->addNewTrack(filepath);
+
+        // Open the newly added track
+        m_playlistPtr->openTrackAtIndex(m_playlistPtr->getNumOfTracks() - 1);
+
+        updateGui();
+    }
+}
+
+void MainWindow::removeFromPlaylistBtnCallback()
+{
+    m_playlistPtr->removeTrack(m_playlistPtr->getCurrentTrackIndex());
+
+    updateGui();
+}
+
+void MainWindow::clearPlaylistBtnCallback()
+{
+    m_playlistPtr->removeAllTracks();
+
+    updateGui();
+}
+
+//-----------------------------------------------------------------------------
 
 int MainWindow::handle(int event)
 {
