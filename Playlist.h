@@ -49,6 +49,8 @@ private:
     Music *m_currentTrack{new Music};
     // If the playlist changed since last time
     bool m_isPlaylistChanged{true};
+    // Number of fails since the last successful open
+    int m_failsSinceLastOpenSuccess{};
 
 public:
     Playlist(const std::string &audioDevName);

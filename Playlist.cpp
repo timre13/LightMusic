@@ -36,14 +36,23 @@ Playlist::Playlist(const std::string &audioDevName)
 
 void Playlist::openTrackAtIndex(size_t index)
 {
+    // Don't retry until stack overflow
+    if (m_failsSinceLastOpenSuccess > 100)
+    {
+        m_failsSinceLastOpenSuccess = 0;
+        return;
+    }
+
     // If playlist is empty
     if (m_filePaths.size() < 1)
         return;
 
-    // If index if out of range
+    // If index is out of range
     if (index >= m_filePaths.size())
     {
         std::cerr << "Failed to open music, invalid index" << '\n';
+        ++m_failsSinceLastOpenSuccess;
+        openTrackAtIndex(m_filePaths.size() - 1); // Try to open the last one
         return;
     }
 
@@ -53,14 +62,17 @@ void Playlist::openTrackAtIndex(size_t index)
         m_currentTrack->closeAndReset();
     }
 
+    // If failed to open track at the current index
     if (m_currentTrack->open(m_filePaths[index], m_audioDevName))
     {
-        // If failed to open music at the current index, try the next one
+        ++m_failsSinceLastOpenSuccess;
+        // Try the next one
         openTrackAtIndex(index + 1);
     }
     else
     {
         m_currentTrackIndex = index;
+        m_failsSinceLastOpenSuccess = 0;
     }
 }
 
