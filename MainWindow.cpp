@@ -140,6 +140,9 @@ MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
     m_stopBtn->copy_tooltip("Stop");
     m_ctrlBtnGrp->end();
 
+
+    m_playPauseBtn->take_focus();
+
     Fl::add_idle(s_tickMusic, this);
     Fl::add_timeout(0, s_updateGui, this);
 
