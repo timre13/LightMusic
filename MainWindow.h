@@ -69,6 +69,8 @@ private:
 
     bool m_isAboutWindowShown{};
 
+    //-------------------------------------------------------------------------
+
     static void s_tickMusic(void *t) { static_cast<MainWindow*>(t)->tickMusic(); }
     void tickMusic();
 
@@ -87,6 +89,9 @@ private:
         m_playPauseBtn->labelcolor(0xff660000);
         m_playPauseBtn->copy_tooltip("Pause");
     }
+
+    //---------------------- Play control button callbacks --------------------
+
     static void s_onPlayPauseButtonPressed(Fl_Widget*, void *t)
     {
         static_cast<MainWindow*>(t)->onPlayPauseButtonPressed();
@@ -104,6 +109,8 @@ private:
         static_cast<MainWindow*>(t)->onNextTrackButtonPressed();
     }
     void onNextTrackButtonPressed();
+
+    //-------------------------------------------------------------------------
 
     static void s_playlistWidgetCallback(Fl_Widget*, void *t)
     {

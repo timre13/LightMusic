@@ -48,6 +48,8 @@ MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
 
     begin();
 
+   //-------------------------- Track info widgets --------------------------- 
+
     m_trackInfoBuffer = new Fl_Text_Buffer{};
     m_trackInfoW = new Fl_Text_Display{0, 0, 300, 320};
     m_trackInfoW->textsize(Fl_Fontsize{12});
@@ -61,7 +63,9 @@ MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
     m_playlistW->end();
     m_playlistW->callback(&s_playlistWidgetCallback, this);
 
-    //----------------------- Playlist control buttons -----------------------
+    //-------------------------------------------------------------------------
+
+    //----------------------- Playlist control buttons ------------------------
 
     m_playlistBtnGrp = new Fl_Group{
             m_playlistW->x(), m_playlistW->h(), m_playlistW->w(), 20};
@@ -92,10 +96,44 @@ MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
     m_playlistBtnGrp->end();
 
     //-------------------------------------------------------------------------
+    
+    //----------------------- Play control buttons ----------------------------
 
     m_ctrlBtnGrp = new Fl_Group{
             0, m_trackInfoW->h()+m_playlistBtnGrp->h(), 180, 60};
+
+    m_prevTrackBtn  = new Fl_Button{0, m_ctrlBtnGrp->y()+10, 40, 40, "@<<"};
+    m_prevTrackBtn->callback(s_onPrevTrackButtonPressed, this);
+    m_prevTrackBtn->labelcolor(FL_YELLOW);
+    m_prevTrackBtn->box(FL_ROUND_UP_BOX);
+    m_prevTrackBtn->copy_tooltip("Jump to previous track");
+
+    m_playPauseBtn = new Fl_Button{
+            m_prevTrackBtn->x()+m_prevTrackBtn->w(), m_ctrlBtnGrp->y(), 60, 60, "@||"};
+    m_playPauseBtn->callback(s_onPlayPauseButtonPressed, this);
+    m_playPauseBtn->box(FL_ROUND_UP_BOX);
+    setPlayPauseButtonToPause();
+
+    m_nextTrackBtn  = new Fl_Button{
+            m_playPauseBtn->x()+m_playPauseBtn->w(), m_ctrlBtnGrp->y()+10,
+            40, 40, "@>>"};
+    m_nextTrackBtn->callback(s_onNextTrackButtonPressed, this);
+    m_nextTrackBtn->labelcolor(FL_YELLOW);
+    m_nextTrackBtn->box(FL_ROUND_UP_BOX);
+    m_nextTrackBtn->copy_tooltip("Jump to next track");
+
+    m_stopBtn       = new Fl_Button{
+            m_nextTrackBtn->x()+m_nextTrackBtn->w(), m_ctrlBtnGrp->y()+10,
+            40, 40, "@square"};
+    m_stopBtn->labelcolor(FL_RED);
+    m_stopBtn->box(FL_ROUND_UP_BOX);
+    m_stopBtn->copy_tooltip("Stop");
+
     m_ctrlBtnGrp->end();
+
+    //-------------------------------------------------------------------------
+
+    //------------------------ Progress display widgets -----------------------
 
     m_timeLabelBuffer = new Fl_Text_Buffer{16};
     m_timeLabel = new Fl_Text_Display{
@@ -113,34 +151,9 @@ MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
     m_progressBar->minimum(0.0);
     m_progressBar->callback(&s_progressBarCallback, this);
 
+    //-------------------------------------------------------------------------
+
     end();
-
-    m_ctrlBtnGrp->begin();
-    m_prevTrackBtn  = new Fl_Button{0, m_ctrlBtnGrp->y()+10, 40, 40, "@<<"};
-    m_prevTrackBtn->callback(s_onPrevTrackButtonPressed, this);
-    m_prevTrackBtn->labelcolor(FL_YELLOW);
-    m_prevTrackBtn->box(FL_ROUND_UP_BOX);
-    m_prevTrackBtn->copy_tooltip("Jump to previous track");
-    m_playPauseBtn = new Fl_Button{
-            m_prevTrackBtn->x()+m_prevTrackBtn->w(), m_ctrlBtnGrp->y(), 60, 60, "@||"};
-    m_playPauseBtn->callback(s_onPlayPauseButtonPressed, this);
-    m_playPauseBtn->box(FL_ROUND_UP_BOX);
-    setPlayPauseButtonToPause();
-    m_nextTrackBtn  = new Fl_Button{
-            m_playPauseBtn->x()+m_playPauseBtn->w(), m_ctrlBtnGrp->y()+10,
-            40, 40, "@>>"};
-    m_nextTrackBtn->callback(s_onNextTrackButtonPressed, this);
-    m_nextTrackBtn->labelcolor(FL_YELLOW);
-    m_nextTrackBtn->box(FL_ROUND_UP_BOX);
-    m_nextTrackBtn->copy_tooltip("Jump to next track");
-    m_stopBtn       = new Fl_Button{
-            m_nextTrackBtn->x()+m_nextTrackBtn->w(), m_ctrlBtnGrp->y()+10,
-            40, 40, "@square"};
-    m_stopBtn->labelcolor(FL_RED);
-    m_stopBtn->box(FL_ROUND_UP_BOX);
-    m_stopBtn->copy_tooltip("Stop");
-    m_ctrlBtnGrp->end();
-
 
     m_playPauseBtn->take_focus();
 
@@ -213,6 +226,8 @@ void MainWindow::updateGui()
     Fl::repeat_timeout(0.5, s_updateGui, this);
 }
 
+//--------------------- Play control button callbacks -------------------------
+
 void MainWindow::onPlayPauseButtonPressed()
 {
     if (m_playlistPtr->isPlaying())
@@ -239,6 +254,8 @@ void MainWindow::onNextTrackButtonPressed()
     m_playlistPtr->jumpToNextTrack();
     setPlayPauseButtonToPause();
 }
+
+//-----------------------------------------------------------------------------
 
 void MainWindow::playlistWidgetCallback()
 {
