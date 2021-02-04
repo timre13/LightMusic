@@ -49,8 +49,16 @@ private:
     Fl_PNG_Image *m_iconImage{};
     Fl_Button *m_iconLabel{};
 
+    Fl_Button *m_webUrlLabel{};
+
     Fl_Text_Display *m_licenseLabel{};
     Fl_Text_Buffer *m_licenseLabelBuffer{};
+
+    static void s_webUrlLabelCallback(Fl_Widget*, void *t)
+    {
+        static_cast<AboutWindow*>(t)->webUrlLabelCallback();
+    }
+    void webUrlLabelCallback();
 
 public:
     AboutWindow();

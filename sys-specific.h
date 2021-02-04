@@ -34,10 +34,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // TODO: Test on Win32
 
+#include <string>
+
 #if defined(__linux__) || defined(__linux) || defined(__unix__) || defined(__unix)
 #include <unistd.h>
+#include <cstdio>
 #elif defined(__WIN32)
 #include <windows.h>
+#include <shellapi.h>
 #else
 static_assert(0, "Unsupported platform.");
 #endif
@@ -51,8 +55,15 @@ inline void wait(double seconds)
     usleep(seconds * 1000'000);
 #elif defined(__WIN32)
     Sleep(seconds * 1000);
-#else
-static_assert(0, "Unsupported platform.");
+#endif
+}
+
+inline void openUrlInWebBrowser(const std::string &url)
+{
+#if defined(__linux__) || defined(__linux) || defined(__unix__) || defined(__unix)
+    std::system(("xdg-open " + url).c_str());
+#elif defined(__WIN32)
+    ShellExecute(0, 0, url.c_str(), 0, 0, SW_SHOW);
 #endif
 }
 

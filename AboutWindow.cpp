@@ -29,6 +29,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AboutWindow.h"
 #include "version.h"
 #include "license.h"
+#include "sys-specific.h"
 #include <iostream>
 #include <FL/Enumerations.H>
 
@@ -49,6 +50,14 @@ AboutWindow::AboutWindow()
     m_versionLabel->labelsize(20);
     m_versionLabel->align(FL_ALIGN_CENTER);
 
+    m_webUrlLabel = new Fl_Button{128, 80, 444, 40};
+    m_webUrlLabel->copy_label("https://github.com/timre13/LightMusic");
+    m_webUrlLabel->box(FL_NO_BOX);
+    m_webUrlLabel->labelcolor(FL_BLUE);
+    m_webUrlLabel->labelsize(15);
+    m_webUrlLabel->align(FL_ALIGN_CENTER);
+    m_webUrlLabel->callback(&s_webUrlLabelCallback, this);
+
     m_iconImage = new Fl_PNG_Image{"img/icon.png"};
     if (m_iconImage->fail())
     {
@@ -65,6 +74,11 @@ AboutWindow::AboutWindow()
     m_licenseLabel->textsize(12);
     m_licenseLabel->buffer(m_licenseLabelBuffer);
     m_licenseLabelBuffer->text(LICENSE_STR);
+}
+
+void AboutWindow::webUrlLabelCallback()
+{
+    SysSpecific::openUrlInWebBrowser(m_webUrlLabel->label());
 }
 
 AboutWindow::~AboutWindow()
