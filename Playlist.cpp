@@ -28,6 +28,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Playlist.h"
 #include <iostream>
+#include <algorithm>
 
 Playlist::Playlist(const std::string &audioDevName)
     : m_audioDevName{audioDevName}
@@ -143,6 +144,14 @@ void Playlist::jumpToNextTrack()
 void Playlist::reloadCurrentTrack()
 {
     openTrackAtIndex(m_currentTrackIndex);
+}
+
+void Playlist::shuffle()
+{
+    std::random_shuffle(m_filePaths.begin(), m_filePaths.end());
+    m_isPlaylistChanged = true;
+
+    openTrackAtIndex(0);
 }
 
 Playlist::~Playlist()

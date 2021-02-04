@@ -54,6 +54,7 @@ private:
     Fl_Button *m_addToPlaylistBtn{};
     Fl_Button *m_removeFromPlaylistBtn{};
     Fl_Button *m_clearPlaylistBtn{};
+    Fl_Button *m_shufflePlaylistBtn{};
 
     Fl_Group  *m_ctrlBtnGrp{};
     Fl_Button *m_playPauseBtn{};
@@ -143,6 +144,12 @@ private:
         static_cast<MainWindow*>(t)->clearPlaylistBtnCallback();
     }
     void clearPlaylistBtnCallback();
+
+    static void s_shufflePlaylistBtnCallback(Fl_Widget*, void *t)
+    {
+        static_cast<MainWindow*>(t)->shufflePlaylistBtnCallback();
+    }
+    void shufflePlaylistBtnCallback();
 
     //-------------------------------------------------------------------------
 

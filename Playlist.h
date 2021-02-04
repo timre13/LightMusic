@@ -87,6 +87,8 @@ public:
         m_isPlaylistChanged = true;
     }
 
+    void shuffle();
+
     inline size_t getNumOfTracks() const { return m_filePaths.size(); }
     inline int getCurrentTrackIndex() const { return m_currentTrackIndex; }
     inline std::string getTrackFilepathAt(size_t index) const

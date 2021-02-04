@@ -93,6 +93,13 @@ MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
     m_clearPlaylistBtn->box(FL_FLAT_BOX);
     m_clearPlaylistBtn->callback(&s_clearPlaylistBtnCallback, this);
 
+    m_shufflePlaylistBtn = new Fl_Button{
+            m_playlistBtnGrp->x()+60, m_playlistBtnGrp->y(), 20, 20};
+    m_shufflePlaylistBtn->copy_label("@refresh");
+    m_shufflePlaylistBtn->copy_tooltip("Shuffle playlist");
+    m_shufflePlaylistBtn->labelcolor(FL_BLUE);
+    m_shufflePlaylistBtn->callback(&s_shufflePlaylistBtnCallback, this);
+
     m_playlistBtnGrp->end();
 
     //-------------------------------------------------------------------------
@@ -324,6 +331,13 @@ void MainWindow::removeFromPlaylistBtnCallback()
 void MainWindow::clearPlaylistBtnCallback()
 {
     m_playlistPtr->removeAllTracks();
+
+    updateGui();
+}
+
+void MainWindow::shufflePlaylistBtnCallback()
+{
+    m_playlistPtr->shuffle();
 
     updateGui();
 }
