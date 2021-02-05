@@ -69,7 +69,6 @@ int main(int argc, char **argv)
 
     auto mainWindow{
         std::make_unique<MainWindow>(800, 400, "LightMusic", playlist.get())};
-    mainWindow->resizable(mainWindow.get());
     mainWindow->show();
 
     return Fl::run();

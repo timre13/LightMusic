@@ -172,6 +172,8 @@ MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
         std::cerr << "Failed to load icon" << '\n';
     else
         this->icon(icon.get());
+
+    resizable(m_playlistW);
 }
 
 void MainWindow::tickMusic()
