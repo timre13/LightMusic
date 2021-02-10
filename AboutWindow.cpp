@@ -52,6 +52,7 @@ AboutWindow::AboutWindow()
 
     m_webUrlLabel = new Fl_Button{128, 80, 444, 40};
     m_webUrlLabel->copy_label("https://github.com/timre13/LightMusic");
+    m_webUrlLabel->copy_tooltip("Click to open webpage");
     m_webUrlLabel->box(FL_NO_BOX);
     m_webUrlLabel->labelcolor(FL_BLUE);
     m_webUrlLabel->labelsize(15);
