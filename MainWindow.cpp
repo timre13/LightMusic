@@ -132,6 +132,7 @@ MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
     m_stopBtn       = new Fl_Button{
             m_nextTrackBtn->x()+m_nextTrackBtn->w(), m_ctrlBtnGrp->y()+10,
             40, 40, "@square"};
+    m_stopBtn->callback(s_stopButton_cb, this);
     m_stopBtn->labelcolor(FL_RED);
     m_stopBtn->box(FL_ROUND_UP_BOX);
     m_stopBtn->copy_tooltip("Stop");
@@ -232,6 +233,12 @@ void MainWindow::updateGui()
     trackInfoBuffer += currentTrack->getAudioStreamInfo();
         m_trackInfoBuffer->text(trackInfoBuffer.c_str());
 
+    // Update the stop button
+    if (m_stopBtn->active() && !m_playlistPtr->isPlaying())
+        m_stopBtn->deactivate();
+    else if (!m_stopBtn->active() && m_playlistPtr->isPlaying())
+        m_stopBtn->activate();
+
     Fl::repeat_timeout(0.5, s_updateGui, this);
 }
 
@@ -250,18 +257,30 @@ void MainWindow::playPauseButton_cb()
         m_playlistPtr->unpauseCurrentTrack();
         setPlayPauseButtonToPause();
     }
+    updateGui();
 }
 
 void MainWindow::prevTrackButton_cb()
 {
     m_playlistPtr->jumpToPrevTrack();
     setPlayPauseButtonToPause();
+    updateGui();
 }
 
 void MainWindow::nextTrackButton_cb()
 {
     m_playlistPtr->jumpToNextTrack();
     setPlayPauseButtonToPause();
+    updateGui();
+}
+
+void MainWindow::stopButton_cb()
+{
+    m_playlistPtr->getCurrentTrack()->seekToS(0);
+    m_playlistPtr->tickCurrentTrack();
+    m_playlistPtr->pauseCurrentTrack();
+    setPlayPauseButtonToPlay();
+    updateGui();
 }
 
 //-----------------------------------------------------------------------------

@@ -111,6 +111,12 @@ private:
     }
     void nextTrackButton_cb();
 
+    static void s_stopButton_cb(Fl_Widget*, void *t)
+    {
+        static_cast<MainWindow*>(t)->stopButton_cb();
+    }
+    void stopButton_cb();
+
     //-------------------------------------------------------------------------
 
     static void s_playlistWidget_cb(Fl_Widget*, void *t)
