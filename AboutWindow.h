@@ -54,11 +54,11 @@ private:
     Fl_Text_Display *m_licenseLabel{};
     Fl_Text_Buffer *m_licenseLabelBuffer{};
 
-    static void s_webUrlLabelCallback(Fl_Widget*, void *t)
+    static void s_webUrlLabel_cb(Fl_Widget*, void *t)
     {
-        static_cast<AboutWindow*>(t)->webUrlLabelCallback();
+        static_cast<AboutWindow*>(t)->webUrlLabel_cb();
     }
-    void webUrlLabelCallback();
+    void webUrlLabel_cb();
 
 public:
     AboutWindow();

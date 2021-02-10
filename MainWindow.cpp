@@ -61,7 +61,7 @@ MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
     m_playlistW = new Fl_Select_Browser{
             m_trackInfoW->w(), 0, w-m_trackInfoW->w(), m_trackInfoW->h()};
     m_playlistW->end();
-    m_playlistW->callback(&s_playlistWidgetCallback, this);
+    m_playlistW->callback(&s_playlistWidget_cb, this);
 
     //-------------------------------------------------------------------------
 
@@ -75,14 +75,14 @@ MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
     m_addToPlaylistBtn->copy_label("@+");
     m_addToPlaylistBtn->copy_tooltip("Add track to playlist...");
     m_addToPlaylistBtn->labelcolor(FL_GREEN);
-    m_addToPlaylistBtn->callback(&s_addToPlaylistBtnCallback, this);
+    m_addToPlaylistBtn->callback(&s_addToPlaylistBtn_cb, this);
 
     m_removeFromPlaylistBtn = new Fl_Button{
             m_playlistBtnGrp->x()+20, m_playlistBtnGrp->y(), 20, 20};
     m_removeFromPlaylistBtn->copy_label("X");
     m_removeFromPlaylistBtn->copy_tooltip("Remove playing track from playlist");
     m_removeFromPlaylistBtn->labelcolor(FL_RED);
-    m_removeFromPlaylistBtn->callback(&s_removeFromPlaylistBtnCallback, this);
+    m_removeFromPlaylistBtn->callback(&s_removeFromPlaylistBtn_cb, this);
 
     m_clearPlaylistBtn = new Fl_Button{
             m_playlistBtnGrp->x()+40, m_playlistBtnGrp->y(), 20, 20};
@@ -91,14 +91,14 @@ MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
     m_clearPlaylistBtn->color(FL_RED);
     m_clearPlaylistBtn->labelcolor(FL_WHITE);
     m_clearPlaylistBtn->box(FL_FLAT_BOX);
-    m_clearPlaylistBtn->callback(&s_clearPlaylistBtnCallback, this);
+    m_clearPlaylistBtn->callback(&s_clearPlaylistBtn_cb, this);
 
     m_shufflePlaylistBtn = new Fl_Button{
             m_playlistBtnGrp->x()+60, m_playlistBtnGrp->y(), 20, 20};
     m_shufflePlaylistBtn->copy_label("@refresh");
     m_shufflePlaylistBtn->copy_tooltip("Shuffle playlist");
     m_shufflePlaylistBtn->labelcolor(FL_BLUE);
-    m_shufflePlaylistBtn->callback(&s_shufflePlaylistBtnCallback, this);
+    m_shufflePlaylistBtn->callback(&s_shufflePlaylistBtn_cb, this);
 
     m_playlistBtnGrp->end();
 
@@ -110,21 +110,21 @@ MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
             0, m_trackInfoW->h()+m_playlistBtnGrp->h(), 180, 60};
 
     m_prevTrackBtn  = new Fl_Button{0, m_ctrlBtnGrp->y()+10, 40, 40, "@<<"};
-    m_prevTrackBtn->callback(s_onPrevTrackButtonPressed, this);
+    m_prevTrackBtn->callback(s_prevTrackButton_cb, this);
     m_prevTrackBtn->labelcolor(FL_YELLOW);
     m_prevTrackBtn->box(FL_ROUND_UP_BOX);
     m_prevTrackBtn->copy_tooltip("Jump to previous track");
 
     m_playPauseBtn = new Fl_Button{
             m_prevTrackBtn->x()+m_prevTrackBtn->w(), m_ctrlBtnGrp->y(), 60, 60, "@||"};
-    m_playPauseBtn->callback(s_onPlayPauseButtonPressed, this);
+    m_playPauseBtn->callback(s_playPauseButton_cb, this);
     m_playPauseBtn->box(FL_ROUND_UP_BOX);
     setPlayPauseButtonToPause();
 
     m_nextTrackBtn  = new Fl_Button{
             m_playPauseBtn->x()+m_playPauseBtn->w(), m_ctrlBtnGrp->y()+10,
             40, 40, "@>>"};
-    m_nextTrackBtn->callback(s_onNextTrackButtonPressed, this);
+    m_nextTrackBtn->callback(s_nextTrackButton_cb, this);
     m_nextTrackBtn->labelcolor(FL_YELLOW);
     m_nextTrackBtn->box(FL_ROUND_UP_BOX);
     m_nextTrackBtn->copy_tooltip("Jump to next track");
@@ -156,7 +156,7 @@ MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
             m_ctrlBtnGrp->w()+10, m_trackInfoW->h()+m_playlistBtnGrp->h()+35,
             w-m_ctrlBtnGrp->w()-20, 20};
     m_progressBar->minimum(0.0);
-    m_progressBar->callback(&s_progressBarCallback, this);
+    m_progressBar->callback(&s_progressBar_cb, this);
 
     //-------------------------------------------------------------------------
 
@@ -237,7 +237,7 @@ void MainWindow::updateGui()
 
 //--------------------- Play control button callbacks -------------------------
 
-void MainWindow::onPlayPauseButtonPressed()
+void MainWindow::playPauseButton_cb()
 {
     if (m_playlistPtr->isPlaying())
     {
@@ -252,13 +252,13 @@ void MainWindow::onPlayPauseButtonPressed()
     }
 }
 
-void MainWindow::onPrevTrackButtonPressed()
+void MainWindow::prevTrackButton_cb()
 {
     m_playlistPtr->jumpToPrevTrack();
     setPlayPauseButtonToPause();
 }
 
-void MainWindow::onNextTrackButtonPressed()
+void MainWindow::nextTrackButton_cb()
 {
     m_playlistPtr->jumpToNextTrack();
     setPlayPauseButtonToPause();
@@ -266,7 +266,7 @@ void MainWindow::onNextTrackButtonPressed()
 
 //-----------------------------------------------------------------------------
 
-void MainWindow::playlistWidgetCallback()
+void MainWindow::playlistWidget_cb()
 {
     int selectedLine{m_playlistW->value()};
     if (selectedLine == 0) // If no line selected, don't change track
@@ -284,7 +284,7 @@ void MainWindow::playlistWidgetCallback()
     setPlayPauseButtonToPause();
 }
 
-void MainWindow::progressBarCallback()
+void MainWindow::progressBar_cb()
 {
     m_playlistPtr->getCurrentTrack()->seekToS(m_progressBar->value());
 
@@ -309,7 +309,7 @@ void MainWindow::progressBarCallback()
 
 //--------------------- Playlist control button callbacks ---------------------
 
-void MainWindow::addToPlaylistBtnCallback()
+void MainWindow::addToPlaylistBtn_cb()
 {
     auto filepath = fl_file_chooser("Select a file...", "", "*");
     if (filepath)
@@ -323,21 +323,21 @@ void MainWindow::addToPlaylistBtnCallback()
     }
 }
 
-void MainWindow::removeFromPlaylistBtnCallback()
+void MainWindow::removeFromPlaylistBtn_cb()
 {
     m_playlistPtr->removeTrack(m_playlistPtr->getCurrentTrackIndex());
 
     updateGui();
 }
 
-void MainWindow::clearPlaylistBtnCallback()
+void MainWindow::clearPlaylistBtn_cb()
 {
     m_playlistPtr->removeAllTracks();
 
     updateGui();
 }
 
-void MainWindow::shufflePlaylistBtnCallback()
+void MainWindow::shufflePlaylistBtn_cb()
 {
     m_playlistPtr->shuffle();
 

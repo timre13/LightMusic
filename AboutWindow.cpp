@@ -56,7 +56,7 @@ AboutWindow::AboutWindow()
     m_webUrlLabel->labelcolor(FL_BLUE);
     m_webUrlLabel->labelsize(15);
     m_webUrlLabel->align(FL_ALIGN_CENTER);
-    m_webUrlLabel->callback(&s_webUrlLabelCallback, this);
+    m_webUrlLabel->callback(&s_webUrlLabel_cb, this);
 
     m_iconImage = new Fl_PNG_Image{"img/icon.png"};
     if (m_iconImage->fail())
@@ -76,7 +76,7 @@ AboutWindow::AboutWindow()
     m_licenseLabelBuffer->text(LICENSE_STR);
 }
 
-void AboutWindow::webUrlLabelCallback()
+void AboutWindow::webUrlLabel_cb()
 {
     SysSpecific::openUrlInWebBrowser(m_webUrlLabel->label());
 }

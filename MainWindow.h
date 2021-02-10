@@ -93,63 +93,63 @@ private:
 
     //---------------------- Play control button callbacks --------------------
 
-    static void s_onPlayPauseButtonPressed(Fl_Widget*, void *t)
+    static void s_playPauseButton_cb(Fl_Widget*, void *t)
     {
-        static_cast<MainWindow*>(t)->onPlayPauseButtonPressed();
+        static_cast<MainWindow*>(t)->playPauseButton_cb();
     }
-    void onPlayPauseButtonPressed();
+    void playPauseButton_cb();
 
-    static void s_onPrevTrackButtonPressed(Fl_Widget*, void *t)
+    static void s_prevTrackButton_cb(Fl_Widget*, void *t)
     {
-        static_cast<MainWindow*>(t)->onPrevTrackButtonPressed();
+        static_cast<MainWindow*>(t)->prevTrackButton_cb();
     }
-    void onPrevTrackButtonPressed();
+    void prevTrackButton_cb();
 
-    static void s_onNextTrackButtonPressed(Fl_Widget*, void *t)
+    static void s_nextTrackButton_cb(Fl_Widget*, void *t)
     {
-        static_cast<MainWindow*>(t)->onNextTrackButtonPressed();
+        static_cast<MainWindow*>(t)->nextTrackButton_cb();
     }
-    void onNextTrackButtonPressed();
+    void nextTrackButton_cb();
 
     //-------------------------------------------------------------------------
 
-    static void s_playlistWidgetCallback(Fl_Widget*, void *t)
+    static void s_playlistWidget_cb(Fl_Widget*, void *t)
     {
-        static_cast<MainWindow*>(t)->playlistWidgetCallback();
+        static_cast<MainWindow*>(t)->playlistWidget_cb();
     }
-    void playlistWidgetCallback();
+    void playlistWidget_cb();
 
-    static void s_progressBarCallback(Fl_Widget*, void *t)
+    static void s_progressBar_cb(Fl_Widget*, void *t)
     {
-        static_cast<MainWindow*>(t)->progressBarCallback();
+        static_cast<MainWindow*>(t)->progressBar_cb();
     }
-    void progressBarCallback();
+    void progressBar_cb();
 
     //------------------- Playlist control button callbacks -------------------
 
-    static void s_addToPlaylistBtnCallback(Fl_Widget*, void *t)
+    static void s_addToPlaylistBtn_cb(Fl_Widget*, void *t)
     {
-        static_cast<MainWindow*>(t)->addToPlaylistBtnCallback();
+        static_cast<MainWindow*>(t)->addToPlaylistBtn_cb();
     }
-    void addToPlaylistBtnCallback();
+    void addToPlaylistBtn_cb();
 
-    static void s_removeFromPlaylistBtnCallback(Fl_Widget*, void *t)
+    static void s_removeFromPlaylistBtn_cb(Fl_Widget*, void *t)
     {
-        static_cast<MainWindow*>(t)->removeFromPlaylistBtnCallback();
+        static_cast<MainWindow*>(t)->removeFromPlaylistBtn_cb();
     }
-    void removeFromPlaylistBtnCallback();
+    void removeFromPlaylistBtn_cb();
 
-    static void s_clearPlaylistBtnCallback(Fl_Widget*, void *t)
+    static void s_clearPlaylistBtn_cb(Fl_Widget*, void *t)
     {
-        static_cast<MainWindow*>(t)->clearPlaylistBtnCallback();
+        static_cast<MainWindow*>(t)->clearPlaylistBtn_cb();
     }
-    void clearPlaylistBtnCallback();
+    void clearPlaylistBtn_cb();
 
-    static void s_shufflePlaylistBtnCallback(Fl_Widget*, void *t)
+    static void s_shufflePlaylistBtn_cb(Fl_Widget*, void *t)
     {
-        static_cast<MainWindow*>(t)->shufflePlaylistBtnCallback();
+        static_cast<MainWindow*>(t)->shufflePlaylistBtn_cb();
     }
-    void shufflePlaylistBtnCallback();
+    void shufflePlaylistBtn_cb();
 
     //-------------------------------------------------------------------------
 
