@@ -74,6 +74,8 @@ AboutWindow::AboutWindow()
     m_licenseLabel->textsize(12);
     m_licenseLabel->buffer(m_licenseLabelBuffer);
     m_licenseLabelBuffer->text(LICENSE_STR);
+
+    m_licenseLabel->take_focus();
 }
 
 void AboutWindow::webUrlLabel_cb()
