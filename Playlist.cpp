@@ -57,11 +57,7 @@ void Playlist::openTrackAtIndex(size_t index)
         return;
     }
 
-    // If music is not in its clean state
-    if (m_currentTrack->getState() != Music::STATE_UNINITIALIZED)
-    {
-        m_currentTrack->closeAndReset();
-    }
+    m_currentTrack->closeAndReset();
 
     // If failed to open track at the current index
     if (m_currentTrack->open(m_filePaths[index], m_audioDevName))
