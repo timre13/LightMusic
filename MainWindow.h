@@ -81,13 +81,11 @@ private:
     inline void setPlayPauseButtonToPlay()
     {
         m_playPauseBtn->copy_label("@>");
-        m_playPauseBtn->labelcolor(FL_GREEN);
         m_playPauseBtn->copy_tooltip("Play");
     }
     inline void setPlayPauseButtonToPause()
     {
         m_playPauseBtn->copy_label("@||");
-        m_playPauseBtn->labelcolor(0xff660000);
         m_playPauseBtn->copy_tooltip("Pause");
     }
 

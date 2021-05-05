@@ -30,6 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AboutWindow.h"
 #include "version.h"
 #include "sys-specific.h"
+#include "config.h"
 #include <string>
 #include <iostream>
 #include <filesystem>
@@ -43,9 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
     : Fl_Double_Window(w, h, title), m_playlistPtr{playlistPtr}
 {
-    if (!Fl::scheme("plastic"))
-        std::cerr << "Failed to set scheme" << '\n';
-
+    color(FL_BLACK);
     begin();
 
    //-------------------------- Track info widgets --------------------------- 
@@ -54,6 +53,8 @@ MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
     m_trackInfoW = new Fl_Text_Display{0, 0, 300, 320};
     m_trackInfoW->textsize(Fl_Fontsize{12});
     m_trackInfoW->textfont(FL_SCREEN);
+    m_trackInfoW->textcolor(TEXT_COLOR);
+    m_trackInfoW->color(BACKGROUND_COLOR);
     m_trackInfoW->buffer(m_trackInfoBuffer);
     m_trackInfoW->set_output();
     m_trackInfoW->end();
@@ -61,6 +62,14 @@ MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
     m_playlistW = new Fl_Select_Browser{
             m_trackInfoW->w(), 0, w-m_trackInfoW->w(), m_trackInfoW->h()};
     m_playlistW->end();
+    m_playlistW->textcolor(TEXT_COLOR);
+    m_playlistW->color(BACKGROUND_COLOR);
+    m_playlistW->selection_color(FL_GRAY);
+    for (int i{}; i < m_playlistW->children(); ++i)
+    {
+        m_playlistW->array()[i]->color(BACKGROUND_COLOR);
+        m_playlistW->array()[i]->color2(BUTTON_COLOR);
+    }
     m_playlistW->callback(&s_playlistWidget_cb, this);
 
     //-------------------------------------------------------------------------
@@ -75,6 +84,7 @@ MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
     m_addToPlaylistBtn->copy_label("@+");
     m_addToPlaylistBtn->copy_tooltip("Add track to playlist...");
     m_addToPlaylistBtn->labelcolor(FL_GREEN);
+    m_addToPlaylistBtn->color(BUTTON_COLOR);
     m_addToPlaylistBtn->callback(&s_addToPlaylistBtn_cb, this);
 
     m_removeFromPlaylistBtn = new Fl_Button{
@@ -82,6 +92,7 @@ MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
     m_removeFromPlaylistBtn->copy_label("X");
     m_removeFromPlaylistBtn->copy_tooltip("Remove playing track from playlist");
     m_removeFromPlaylistBtn->labelcolor(FL_RED);
+    m_removeFromPlaylistBtn->color(BUTTON_COLOR);
     m_removeFromPlaylistBtn->callback(&s_removeFromPlaylistBtn_cb, this);
 
     m_clearPlaylistBtn = new Fl_Button{
@@ -97,7 +108,8 @@ MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
             m_playlistBtnGrp->x()+60, m_playlistBtnGrp->y(), 20, 20};
     m_shufflePlaylistBtn->copy_label("@refresh");
     m_shufflePlaylistBtn->copy_tooltip("Shuffle playlist");
-    m_shufflePlaylistBtn->labelcolor(FL_BLUE);
+    m_shufflePlaylistBtn->labelcolor(fl_rgb_color(100, 150, 255));
+    m_shufflePlaylistBtn->color(BUTTON_COLOR);
     m_shufflePlaylistBtn->callback(&s_shufflePlaylistBtn_cb, this);
 
     m_playlistBtnGrp->end();
@@ -111,7 +123,8 @@ MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
 
     m_prevTrackBtn  = new Fl_Button{0, m_ctrlBtnGrp->y()+10, 40, 40, "@<<"};
     m_prevTrackBtn->callback(s_prevTrackButton_cb, this);
-    m_prevTrackBtn->labelcolor(FL_YELLOW);
+    m_prevTrackBtn->labelcolor(FL_GREEN);
+    m_prevTrackBtn->color(BUTTON_COLOR);
     m_prevTrackBtn->box(FL_ROUND_UP_BOX);
     m_prevTrackBtn->copy_tooltip("Jump to previous track");
 
@@ -119,13 +132,16 @@ MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
             m_prevTrackBtn->x()+m_prevTrackBtn->w(), m_ctrlBtnGrp->y(), 60, 60, "@||"};
     m_playPauseBtn->callback(s_playPauseButton_cb, this);
     m_playPauseBtn->box(FL_ROUND_UP_BOX);
+    m_playPauseBtn->labelcolor(FL_GREEN);
+    m_playPauseBtn->color(BUTTON_COLOR);
     setPlayPauseButtonToPause();
 
     m_nextTrackBtn  = new Fl_Button{
             m_playPauseBtn->x()+m_playPauseBtn->w(), m_ctrlBtnGrp->y()+10,
             40, 40, "@>>"};
     m_nextTrackBtn->callback(s_nextTrackButton_cb, this);
-    m_nextTrackBtn->labelcolor(FL_YELLOW);
+    m_nextTrackBtn->labelcolor(FL_GREEN);
+    m_nextTrackBtn->color(BUTTON_COLOR);
     m_nextTrackBtn->box(FL_ROUND_UP_BOX);
     m_nextTrackBtn->copy_tooltip("Jump to next track");
 
@@ -133,7 +149,8 @@ MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
             m_nextTrackBtn->x()+m_nextTrackBtn->w(), m_ctrlBtnGrp->y()+10,
             40, 40, "@square"};
     m_stopBtn->callback(s_stopButton_cb, this);
-    m_stopBtn->labelcolor(FL_RED);
+    m_stopBtn->labelcolor(FL_GREEN);
+    m_stopBtn->color(BUTTON_COLOR);
     m_stopBtn->box(FL_ROUND_UP_BOX);
     m_stopBtn->copy_tooltip("Stop");
 
@@ -150,12 +167,15 @@ MainWindow::MainWindow(int w, int h, const char *title, Playlist *playlistPtr)
     m_timeLabel->buffer(m_timeLabelBuffer);
     m_timeLabel->set_output();
     m_timeLabel->box(FL_NO_BOX);
-    m_timeLabel->color(FL_BACKGROUND_COLOR);
+    m_timeLabel->color(BACKGROUND_COLOR);
+    m_timeLabel->textcolor(FL_GREEN);
     m_timeLabelBuffer->text("00:00:00/00:00:00");
 
     m_progressBar = new Fl_Hor_Nice_Slider{
             m_ctrlBtnGrp->w()+10, m_trackInfoW->h()+m_playlistBtnGrp->h()+35,
             w-m_ctrlBtnGrp->w()-20, 20};
+    m_progressBar->color(BUTTON_COLOR);
+    m_progressBar->color2(FL_GREEN);
     m_progressBar->minimum(0.0);
     m_progressBar->callback(&s_progressBar_cb, this);
 
